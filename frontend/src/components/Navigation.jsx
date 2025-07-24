@@ -32,7 +32,7 @@ const Navigation = ({
             <div className="flex-shrink-0 flex items-center">
               <div className="text-2xl">🏥</div>
               <h1 className="ml-2 text-xl font-bold text-gray-900">
-                HealthCare
+                Ring A Doctor
               </h1>
               <span className="ml-3 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                 {userType === "patient" ? "Patient Portal" : "Doctor Portal"}

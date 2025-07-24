@@ -64,7 +64,7 @@ const comprehensiveSeed = async () => {
           },
         ],
         insurance: {
-          provider: "HealthCare Plus",
+          provider: "MediCare Plus",
           policyNumber: "HP123456789",
           groupNumber: "GRP001",
           expirationDate: new Date("2025-12-31"),

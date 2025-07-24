@@ -158,7 +158,7 @@ const App = () => {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Welcome to HealthCare System
+          Welcome to Ring A Doctor (RAD)
         </h2>
         <p className="text-gray-600">
           Please select a view from the navigation

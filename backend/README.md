@@ -1,4 +1,4 @@
-# Healthcare System API Documentation
+# Ring A Doctor (RAD) API Documentation
 
 ## Setup Instructions
 

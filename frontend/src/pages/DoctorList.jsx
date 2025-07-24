@@ -59,8 +59,7 @@ const DoctorList = ({ setCurrentView, setSelectedDoctor }) => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Doctors</h1>
         <p className="text-gray-600">
-          Browse and book appointments with our qualified healthcare
-          professionals
+          Browse and book appointments with our qualified medical professionals
         </p>
       </div>
 

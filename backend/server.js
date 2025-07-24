@@ -41,7 +41,7 @@ app.use("/api/prescriptions", prescriptionRoutes);
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: "Healthcare System API is running!",
+    message: "Ring A Doctor (RAD) API is running!",
     timestamp: new Date().toISOString(),
   });
 });
@@ -109,7 +109,7 @@ app.use((req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Healthcare System API running on port ${PORT}`);
+  console.log(`🚀 Ring A Doctor (RAD) API running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(
     `🌐 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:5173"}`

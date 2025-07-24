@@ -50,7 +50,7 @@ const WelcomePage = ({
       } else {
         setError(result.message || "Login failed");
       }
-    } catch (_error) {
+    } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
@@ -109,7 +109,7 @@ const WelcomePage = ({
       } else {
         setError(result.message || "Registration failed");
       }
-    } catch (_error) {
+    } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
@@ -137,10 +137,10 @@ const WelcomePage = ({
         <div className="text-center">
           <div className="text-6xl mb-4">🏥</div>
           <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
-            HealthCare System
+            Ring A Doctor (RAD)
           </h2>
           <p className="text-gray-600">
-            Your trusted healthcare management platform
+            Your trusted medical appointment platform
           </p>
         </div>
 

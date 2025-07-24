@@ -1,6 +1,6 @@
-# Healthcare Management System (RAD)
+# Ring A Doctor (RAD) - Medical Appointment System
 
-A comprehensive healthcare management system built with React, Node.js, Express, and MongoDB.
+A comprehensive medical appointment management system built with React, Node.js, Express, and MongoDB.
 
 ## 🏥 Features
 
@@ -115,4 +115,4 @@ See `DATABASE_DESIGN.md` for complete database schema and relationship documenta
 
 ## 🤝 Contributing
 
-This is a healthcare management system project. All medical data used is for demonstration purposes only.
+This is a medical appointment management system project. All medical data used is for demonstration purposes only.

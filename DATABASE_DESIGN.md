@@ -1,4 +1,4 @@
-# Healthcare System Database Design
+# Ring A Doctor (RAD) Database Design
 
 ## 📊 Entity Relationship Overview
 
