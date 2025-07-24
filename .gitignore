@@ -1,0 +1,13 @@
+# Ignore root-level node_modules
+node_modules/
+
+# Ignore environment files
+.env
+
+# Ignore node_modules in subfolders
+backend/node_modules/
+frontend/node_modules/
+
+# Ignore env files in subfolders
+backend/.env
+frontend/.env
