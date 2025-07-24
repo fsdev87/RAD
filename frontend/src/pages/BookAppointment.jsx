@@ -1,16 +1,46 @@
 import React, { useState } from "react";
+import { appointmentsAPI } from "../services/api";
 
-const BookAppointment = ({ selectedDoctor, setCurrentView }) => {
+const BookAppointment = ({ selectedDoctor, setCurrentView, currentUser }) => {
   const [formData, setFormData] = useState({
     selectedSlot: "",
     reason: "",
     notes: "",
-    patientName: "John Doe", // Mock current user
-    patientEmail: "john.doe@email.com",
-    patientPhone: "+1-555-0123",
+    patientName: currentUser?.name || "Unknown User",
+    patientEmail: currentUser?.email || "",
+    patientPhone: currentUser?.phone || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Generate default time slots for the next 7 days
+  const generateDefaultSlots = () => {
+    const slots = [];
+    const today = new Date();
+
+    for (let i = 1; i <= 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+
+      // Generate morning and afternoon slots
+      const morningSlot = new Date(date);
+      morningSlot.setHours(9, 0, 0, 0);
+
+      const afternoonSlot = new Date(date);
+      afternoonSlot.setHours(14, 0, 0, 0);
+
+      const eveningSlot = new Date(date);
+      eveningSlot.setHours(16, 30, 0, 0);
+
+      slots.push(
+        morningSlot.toISOString(),
+        afternoonSlot.toISOString(),
+        eveningSlot.toISOString()
+      );
+    }
+
+    return slots;
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -24,16 +54,44 @@ const BookAppointment = ({ selectedDoctor, setCurrentView }) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setShowSuccess(true);
+    try {
+      // Prepare appointment data for API
+      const selectedDate = new Date(formData.selectedSlot);
+      const appointmentData = {
+        doctorId: selectedDoctor._id,
+        date: selectedDate.toISOString().split("T")[0], // YYYY-MM-DD format
+        time: selectedDate.toTimeString().slice(0, 5), // HH:MM format
+        reason: formData.reason,
+        type: formData.appointmentType,
+        symptoms: formData.notes ? [formData.notes] : [],
+      };
 
-      // Auto redirect after 3 seconds
-      setTimeout(() => {
-        setCurrentView("appointments");
-      }, 3000);
-    }, 1500);
+      console.log("Creating appointment:", appointmentData);
+
+      // Call real API to create appointment
+      const result = await appointmentsAPI.createAppointment(appointmentData);
+
+      if (result.success) {
+        console.log("Appointment created successfully:", result.appointment);
+        setIsSubmitting(false);
+        setShowSuccess(true);
+
+        // Auto redirect after 3 seconds
+        setTimeout(() => {
+          setCurrentView("appointments");
+        }, 3000);
+      } else {
+        console.error("Failed to create appointment:", result.message);
+        setIsSubmitting(false);
+        alert(`Failed to book appointment: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error booking appointment:", error);
+      setIsSubmitting(false);
+      alert(
+        "An error occurred while booking your appointment. Please try again."
+      );
+    }
   };
 
   if (!selectedDoctor) {
@@ -166,7 +224,9 @@ const BookAppointment = ({ selectedDoctor, setCurrentView }) => {
                   Select Available Time Slot *
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {selectedDoctor.availableSlots.map((slot, index) => (
+                  {(
+                    selectedDoctor?.availableSlots || generateDefaultSlots()
+                  ).map((slot, index) => (
                     <label key={index} className="relative">
                       <input
                         type="radio"

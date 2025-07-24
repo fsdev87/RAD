@@ -1,30 +1,65 @@
-import React, { useState } from "react";
-import { getAppointmentsByDoctor, getPatientById } from "../data/mockData";
+import React, { useState, useEffect } from "react";
+import { appointmentsAPI } from "../services/api";
 
 const DoctorAppointments = () => {
   const [selectedTab, setSelectedTab] = useState("today");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const currentDoctorId = 1; // Mock current doctor ID
+  const [allAppointments, setAllAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const allAppointments = getAppointmentsByDoctor(currentDoctorId);
+  // Fetch doctor appointments from API
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        setLoading(true);
+        console.log("Fetching doctor appointments...");
+        const result = await appointmentsAPI.getDoctorAppointments();
+        console.log("Doctor appointments API result:", result);
+
+        if (result.success) {
+          console.log("Doctor appointments data:", result.appointments);
+          setAllAppointments(result.appointments || []);
+        } else {
+          console.error("Doctor appointments API error:", result.message);
+          setError(result.message || "Failed to fetch appointments");
+        }
+      } catch (err) {
+        console.error("Error fetching doctor appointments:", err);
+        setError("Network error. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
 
   const today = new Date().toISOString().split("T")[0];
   const todayAppointments = allAppointments.filter((apt) => apt.date === today);
   const upcomingAppointments = allAppointments.filter(
-    (apt) => new Date(apt.date) > new Date() && apt.status !== "completed"
+    (apt) =>
+      new Date(apt.date) > new Date() &&
+      apt.status !== "completed" &&
+      apt.status !== "cancelled"
   );
   const pastAppointments = allAppointments.filter(
-    (apt) => apt.status === "completed" || new Date(apt.date) < new Date()
+    (apt) =>
+      apt.status === "completed" ||
+      apt.status === "cancelled" ||
+      new Date(apt.date) < new Date()
   );
 
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmed":
         return "bg-green-100 text-green-800";
+      case "scheduled":
+        return "bg-blue-100 text-blue-800";
       case "pending":
         return "bg-yellow-100 text-yellow-800";
       case "completed":
-        return "bg-blue-100 text-blue-800";
+        return "bg-gray-100 text-gray-800";
       case "cancelled":
         return "bg-red-100 text-red-800";
       default:
@@ -47,15 +82,42 @@ const DoctorAppointments = () => {
     });
   };
 
-  const handleStatusUpdate = (appointmentId, newStatus) => {
-    // Mock status update - in real app, this would call an API
-    console.log(`Updating appointment ${appointmentId} to ${newStatus}`);
-    // Force re-render by updating selected appointment
-    setSelectedAppointment(null);
+  const handleStatusUpdate = async (appointmentId, newStatus) => {
+    try {
+      console.log(`Updating appointment ${appointmentId} to ${newStatus}`);
+      const result = await appointmentsAPI.updateAppointmentStatus(
+        appointmentId,
+        newStatus
+      );
+
+      if (result.success) {
+        // Update the appointment in the local state
+        setAllAppointments((prevAppointments) =>
+          prevAppointments.map((apt) =>
+            apt._id === appointmentId ? { ...apt, status: newStatus } : apt
+          )
+        );
+        setSelectedAppointment(null);
+        console.log("Appointment status updated successfully");
+      } else {
+        console.error("Failed to update appointment status:", result.message);
+        alert(`Failed to update appointment: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error updating appointment status:", error);
+      alert(
+        "An error occurred while updating the appointment. Please try again."
+      );
+    }
   };
 
   const AppointmentCard = ({ appointment, showActions = true }) => {
-    const patient = getPatientById(appointment.patientId);
+    // Use real appointment data structure
+    const patient = appointment.patient || {
+      name: "Unknown Patient",
+      email: "N/A",
+      phone: "N/A",
+    };
 
     return (
       <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
@@ -63,15 +125,15 @@ const DoctorAppointments = () => {
           <div className="flex items-center">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-blue-600 font-semibold text-lg">
-                {appointment.patientName.charAt(0)}
+                {patient.name?.charAt(0) || "P"}
               </span>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                {appointment.patientName}
+                {patient.name}
               </h3>
-              <p className="text-gray-600">{patient?.email}</p>
-              <p className="text-gray-600 text-sm">{patient?.phone}</p>
+              <p className="text-gray-600">{patient.email}</p>
+              <p className="text-gray-600 text-sm">{patient.phone}</p>
             </div>
           </div>
           <span
@@ -128,10 +190,14 @@ const DoctorAppointments = () => {
             <span className="text-sm font-medium text-gray-600">Reason: </span>
             <span className="text-gray-900">{appointment.reason}</span>
           </div>
-          {appointment.notes && (
+          {appointment.symptoms && appointment.symptoms.length > 0 && (
             <div className="mb-2">
-              <span className="text-sm font-medium text-gray-600">Notes: </span>
-              <span className="text-gray-900">{appointment.notes}</span>
+              <span className="text-sm font-medium text-gray-600">
+                Symptoms:{" "}
+              </span>
+              <span className="text-gray-900">
+                {appointment.symptoms.join(", ")}
+              </span>
             </div>
           )}
           <div>
@@ -149,7 +215,7 @@ const DoctorAppointments = () => {
               Start Consultation
             </button>
             <button
-              onClick={() => handleStatusUpdate(appointment.id, "completed")}
+              onClick={() => handleStatusUpdate(appointment._id, "completed")}
               className="px-4 py-2 border border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition duration-200"
             >
               Mark Complete
@@ -160,16 +226,33 @@ const DoctorAppointments = () => {
           </div>
         )}
 
+        {showActions && appointment.status === "scheduled" && (
+          <div className="flex space-x-3">
+            <button
+              onClick={() => handleStatusUpdate(appointment._id, "confirmed")}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-200"
+            >
+              Confirm Appointment
+            </button>
+            <button
+              onClick={() => handleStatusUpdate(appointment._id, "cancelled")}
+              className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition duration-200"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+
         {showActions && appointment.status === "pending" && (
           <div className="flex space-x-3">
             <button
-              onClick={() => handleStatusUpdate(appointment.id, "confirmed")}
+              onClick={() => handleStatusUpdate(appointment._id, "confirmed")}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-200"
             >
               Confirm
             </button>
             <button
-              onClick={() => handleStatusUpdate(appointment.id, "cancelled")}
+              onClick={() => handleStatusUpdate(appointment._id, "cancelled")}
               className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition duration-200"
             >
               Decline
@@ -183,6 +266,8 @@ const DoctorAppointments = () => {
   const ConsultationModal = ({ appointment, onClose }) => {
     if (!appointment) return null;
 
+    const patient = appointment.patient || { name: "Unknown Patient" };
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -191,7 +276,7 @@ const DoctorAppointments = () => {
               <div>
                 <h2 className="text-2xl font-bold">Patient Consultation</h2>
                 <p className="text-blue-100">
-                  {appointment.patientName} - {formatDate(appointment.date)} at{" "}
+                  {patient.name} - {formatDate(appointment.date)} at{" "}
                   {formatTime(appointment.time)}
                 </p>
               </div>
@@ -226,8 +311,18 @@ const DoctorAppointments = () => {
                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                   <div>
                     <span className="font-medium text-gray-600">Name:</span>
+                    <span className="ml-2 text-gray-900">{patient.name}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Email:</span>
                     <span className="ml-2 text-gray-900">
-                      {appointment.patientName}
+                      {patient.email || "N/A"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Phone:</span>
+                    <span className="ml-2 text-gray-900">
+                      {patient.phone || "N/A"}
                     </span>
                   </div>
                   <div>
@@ -236,10 +331,14 @@ const DoctorAppointments = () => {
                       {appointment.reason}
                     </span>
                   </div>
-                  {appointment.notes && (
+                  {appointment.symptoms && appointment.symptoms.length > 0 && (
                     <div>
-                      <span className="font-medium text-gray-600">Notes:</span>
-                      <p className="mt-1 text-gray-900">{appointment.notes}</p>
+                      <span className="font-medium text-gray-600">
+                        Symptoms:
+                      </span>
+                      <p className="mt-1 text-gray-900">
+                        {appointment.symptoms.join(", ")}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -276,7 +375,7 @@ const DoctorAppointments = () => {
               </button>
               <button
                 onClick={() => {
-                  handleStatusUpdate(appointment.id, "completed");
+                  handleStatusUpdate(appointment._id, "completed");
                   onClose();
                 }}
                 className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-200"
@@ -391,10 +490,25 @@ const DoctorAppointments = () => {
       <div className="space-y-6">
         {selectedTab === "today" && (
           <>
-            {todayAppointments.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">⏳</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Loading appointments...
+                </h3>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <div className="text-red-400 text-6xl mb-4">⚠️</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Error loading appointments
+                </h3>
+                <p className="text-gray-600">{error}</p>
+              </div>
+            ) : todayAppointments.length > 0 ? (
               todayAppointments.map((appointment) => (
                 <AppointmentCard
-                  key={appointment.id}
+                  key={appointment._id}
                   appointment={appointment}
                 />
               ))
@@ -412,10 +526,25 @@ const DoctorAppointments = () => {
 
         {selectedTab === "upcoming" && (
           <>
-            {upcomingAppointments.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">⏳</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Loading appointments...
+                </h3>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <div className="text-red-400 text-6xl mb-4">⚠️</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Error loading appointments
+                </h3>
+                <p className="text-gray-600">{error}</p>
+              </div>
+            ) : upcomingAppointments.length > 0 ? (
               upcomingAppointments.map((appointment) => (
                 <AppointmentCard
-                  key={appointment.id}
+                  key={appointment._id}
                   appointment={appointment}
                 />
               ))
@@ -435,10 +564,25 @@ const DoctorAppointments = () => {
 
         {selectedTab === "past" && (
           <>
-            {pastAppointments.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">⏳</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Loading appointments...
+                </h3>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <div className="text-red-400 text-6xl mb-4">⚠️</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Error loading appointments
+                </h3>
+                <p className="text-gray-600">{error}</p>
+              </div>
+            ) : pastAppointments.length > 0 ? (
               pastAppointments.map((appointment) => (
                 <AppointmentCard
-                  key={appointment.id}
+                  key={appointment._id}
                   appointment={appointment}
                   showActions={false}
                 />

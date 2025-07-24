@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { getPrescriptionsByPatient, getDoctorById } from "../data/mockData";
+// TODO: Import prescriptionsAPI when implementing real API integration
 
 const PatientPrescriptions = () => {
   const [selectedPrescription, setSelectedPrescription] = useState(null);
-  const currentPatientId = 1; // Mock current user ID
 
-  const prescriptions = getPrescriptionsByPatient(currentPatientId);
+  // TODO: Replace with real API call to prescriptionsAPI.getPatientPrescriptions()
+  const prescriptions = []; // Placeholder - will be populated from database
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -16,7 +16,11 @@ const PatientPrescriptions = () => {
   };
 
   const PrescriptionCard = ({ prescription }) => {
-    const doctor = getDoctorById(prescription.doctorId);
+    // TODO: Doctor info will be populated from prescription.doctor when using real API
+    const doctor = prescription.doctor || {
+      name: "Unknown Doctor",
+      specialization: "General",
+    };
 
     return (
       <div
@@ -90,7 +94,11 @@ const PatientPrescriptions = () => {
   const PrescriptionModal = ({ prescription, onClose }) => {
     if (!prescription) return null;
 
-    const doctor = getDoctorById(prescription.doctorId);
+    // TODO: Doctor info will be populated from prescription.doctor when using real API
+    const doctor = prescription.doctor || {
+      name: "Unknown Doctor",
+      specialization: "General",
+    };
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

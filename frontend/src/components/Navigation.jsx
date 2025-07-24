@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 
-const Navigation = ({ currentView, setCurrentView, userType, onLogout }) => {
+const Navigation = ({
+  currentView,
+  setCurrentView,
+  userType,
+  currentUser,
+  onLogout,
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -85,10 +91,12 @@ const Navigation = ({ currentView, setCurrentView, userType, onLogout }) => {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                   <div className="p-4 border-b border-gray-200">
                     <p className="font-medium text-gray-900">
-                      {userType === "patient" ? "John Doe" : "Dr. Sarah Wilson"}
+                      {currentUser?.name || "User"}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {userType === "patient" ? "Patient" : "Cardiologist"}
+                      {userType === "patient"
+                        ? "Patient"
+                        : currentUser?.specialization || "Doctor"}
                     </p>
                   </div>
                   <div className="py-2">

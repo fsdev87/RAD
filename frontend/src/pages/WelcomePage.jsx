@@ -1,8 +1,16 @@
 import React, { useState } from "react";
+import { authAPI } from "../services/api";
 
-const WelcomePage = ({ setUserType, setCurrentView, setIsAuthenticated }) => {
+const WelcomePage = ({
+  setUserType,
+  setCurrentView,
+  setIsAuthenticated,
+  setCurrentUser,
+}) => {
   const [activeTab, setActiveTab] = useState("login");
   const [userRole, setUserRole] = useState("patient");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
@@ -17,29 +25,94 @@ const WelcomePage = ({ setUserType, setCurrentView, setIsAuthenticated }) => {
     licenseNumber: "", // for doctors
   });
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Mock login - just proceed without validation
-    setUserType(userRole);
-    setIsAuthenticated(true);
-    // Set initial view based on user role
-    if (userRole === "patient") {
-      setCurrentView("doctors");
-    } else {
-      setCurrentView("doctor-appointments");
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await authAPI.login({
+        email: loginForm.email,
+        password: loginForm.password,
+      });
+
+      if (result.success) {
+        const { user } = result;
+        setUserType(user.role);
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        // Set initial view based on user role
+        if (user.role === "patient") {
+          setCurrentView("doctors");
+        } else {
+          setCurrentView("doctor-appointments");
+        }
+      } else {
+        setError(result.message || "Login failed");
+      }
+    } catch (_error) {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // Mock registration - just proceed without validation
-    setUserType(userRole);
-    setIsAuthenticated(true);
-    // Set initial view based on user role
-    if (userRole === "patient") {
-      setCurrentView("doctors");
-    } else {
-      setCurrentView("doctor-appointments");
+    setLoading(true);
+    setError("");
+
+    // Validation
+    if (registerForm.password !== registerForm.confirmPassword) {
+      setError("Passwords don't match");
+      setLoading(false);
+      return;
+    }
+
+    if (
+      userRole === "doctor" &&
+      (!registerForm.specialization || !registerForm.licenseNumber)
+    ) {
+      setError("Specialization and license number are required for doctors");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const userData = {
+        name: registerForm.fullName,
+        email: registerForm.email,
+        password: registerForm.password,
+        role: userRole,
+        phone: registerForm.phone,
+      };
+
+      // Add doctor-specific fields
+      if (userRole === "doctor") {
+        userData.specialization = registerForm.specialization;
+        userData.licenseNumber = registerForm.licenseNumber;
+      }
+
+      const result = await authAPI.register(userData);
+
+      if (result.success) {
+        const { user } = result;
+        setUserType(user.role);
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        // Set initial view based on user role
+        if (user.role === "patient") {
+          setCurrentView("doctors");
+        } else {
+          setCurrentView("doctor-appointments");
+        }
+      } else {
+        setError(result.message || "Registration failed");
+      }
+    } catch (_error) {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,6 +196,13 @@ const WelcomePage = ({ setUserType, setCurrentView, setIsAuthenticated }) => {
 
         {/* Forms */}
         <div className="bg-white rounded-lg shadow-lg p-8">
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
           {activeTab === "login" ? (
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
@@ -134,9 +214,10 @@ const WelcomePage = ({ setUserType, setCurrentView, setIsAuthenticated }) => {
                   name="email"
                   value={loginForm.email}
                   onChange={handleLoginInputChange}
-                  placeholder={`Enter your ${userRole} email`}
+                  placeholder="e.g., john@patient.com or sarah@doctor.com"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
+                  disabled={loading}
                 />
               </div>
               <div>
@@ -151,13 +232,57 @@ const WelcomePage = ({ setUserType, setCurrentView, setIsAuthenticated }) => {
                   placeholder="Enter your password"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
+                  disabled={loading}
                 />
               </div>
+
+              {/* Sample Credentials Helper */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-blue-800 text-sm font-medium mb-2">
+                  Sample Login Credentials:
+                </p>
+                <div className="text-blue-700 text-sm space-y-1">
+                  <p>
+                    <strong>Patient:</strong> john@patient.com / password123
+                  </p>
+                  <p>
+                    <strong>Doctor:</strong> sarah@doctor.com / password123
+                  </p>
+                </div>
+              </div>
+
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105 disabled:transform-none"
               >
-                Login as {userRole === "patient" ? "Patient" : "Doctor"}
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Logging in...
+                  </span>
+                ) : (
+                  `Login as ${userRole === "patient" ? "Patient" : "Doctor"}`
+                )}
               </button>
             </form>
           ) : (
@@ -275,27 +400,39 @@ const WelcomePage = ({ setUserType, setCurrentView, setIsAuthenticated }) => {
               </div>
               <button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
+                disabled={loading}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105 disabled:transform-none"
               >
-                Register as {userRole === "patient" ? "Patient" : "Doctor"}
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Registering...
+                  </span>
+                ) : (
+                  `Register as ${userRole === "patient" ? "Patient" : "Doctor"}`
+                )}
               </button>
             </form>
           )}
-
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
-              Demo Credentials:
-            </h4>
-            <div className="text-sm text-gray-600 space-y-1">
-              <p>
-                <strong>Patient:</strong> patient@demo.com / password123
-              </p>
-              <p>
-                <strong>Doctor:</strong> doctor@demo.com / password123
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

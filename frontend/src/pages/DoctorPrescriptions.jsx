@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  getPrescriptionsByDoctor,
-  getPatientById,
-  getAppointmentsByDoctor,
-} from "../data/mockData";
+// TODO: Import prescriptionsAPI and appointmentsAPI when implementing real API integration
 
 // Separate component to prevent re-creation on every render
 const CreatePrescriptionForm = ({
@@ -307,9 +303,9 @@ const DoctorPrescriptions = () => {
     followUpDate: "",
   });
 
-  const currentDoctorId = 1; // Mock current doctor ID
-  const prescriptions = getPrescriptionsByDoctor(currentDoctorId);
-  const doctorAppointments = getAppointmentsByDoctor(currentDoctorId);
+  // TODO: Replace with real API calls when implementing
+  const prescriptions = []; // Placeholder - will be populated from database
+  const doctorAppointments = []; // Placeholder - will be populated from database
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -386,7 +382,11 @@ const DoctorPrescriptions = () => {
   };
 
   const PrescriptionCard = ({ prescription }) => {
-    const patient = getPatientById(prescription.patientId);
+    // TODO: Patient info will be populated from prescription.patient when using real API
+    const patient = prescription.patient || {
+      name: "Unknown Patient",
+      phone: "N/A",
+    };
 
     return (
       <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
