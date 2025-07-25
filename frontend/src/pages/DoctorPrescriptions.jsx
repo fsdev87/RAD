@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-// TODO: Import prescriptionsAPI and appointmentsAPI when implementing real API integration
+import React, { useState, useEffect } from "react";
+import { prescriptionsAPI, appointmentsAPI } from "../services/api";
 
 // Separate component to prevent re-creation on every render
 const CreatePrescriptionForm = ({
@@ -12,6 +12,8 @@ const CreatePrescriptionForm = ({
   handleRemoveMedication,
   handleSubmitPrescription,
   doctorAppointments,
+  error,
+  isSubmitting,
 }) => {
   if (!showCreateForm) return null;
 
@@ -43,10 +45,16 @@ const CreatePrescriptionForm = ({
         </div>
 
         <form onSubmit={handleSubmitPrescription} className="p-6">
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Patient (Appointment)
+                Select Completed Consultation
               </label>
               <select
                 name="appointmentId"
@@ -55,13 +63,25 @@ const CreatePrescriptionForm = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               >
-                <option value="">Choose an appointment</option>
-                {doctorAppointments.map((apt) => (
-                  <option key={apt.id} value={apt.id}>
-                    {apt.patientName} - {apt.date} {apt.time}
-                  </option>
-                ))}
+                <option value="">Choose a completed consultation...</option>
+                {doctorAppointments.length === 0 ? (
+                  <option disabled>No completed consultations available</option>
+                ) : (
+                  doctorAppointments.map((apt) => (
+                    <option key={apt._id} value={apt._id}>
+                      {apt.patient?.name || "Unknown Patient"} -{" "}
+                      {new Date(apt.date).toLocaleDateString()} at {apt.time} (
+                      {apt.reason})
+                    </option>
+                  ))
+                )}
               </select>
+              {doctorAppointments.length === 0 && (
+                <p className="mt-2 text-sm text-gray-600">
+                  💡 Complete patient consultations first to create
+                  prescriptions
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -271,9 +291,36 @@ const CreatePrescriptionForm = ({
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200"
+              disabled={isSubmitting}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition duration-200 flex items-center"
             >
-              Create Prescription
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Creating...
+                </>
+              ) : (
+                "Create Prescription"
+              )}
             </button>
           </div>
         </form>
@@ -285,6 +332,11 @@ const CreatePrescriptionForm = ({
 const DoctorPrescriptions = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [doctorAppointments, setDoctorAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newPrescription, setNewPrescription] = useState({
     patientId: "",
     appointmentId: "",
@@ -303,9 +355,53 @@ const DoctorPrescriptions = () => {
     followUpDate: "",
   });
 
-  // TODO: Replace with real API calls when implementing
-  const prescriptions = []; // Placeholder - will be populated from database
-  const doctorAppointments = []; // Placeholder - will be populated from database
+  // Fetch prescriptions and appointments on component mount
+  useEffect(() => {
+    fetchPrescriptions();
+    fetchDoctorAppointments();
+  }, []);
+
+  const fetchPrescriptions = async () => {
+    try {
+      setLoading(true);
+      const result = await prescriptionsAPI.getDoctorPrescriptions();
+      if (result.success) {
+        setPrescriptions(result.prescriptions || []);
+      } else {
+        setError(result.message || "Failed to fetch prescriptions");
+      }
+    } catch (err) {
+      console.error("Error fetching prescriptions:", err);
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDoctorAppointments = async () => {
+    try {
+      const result = await appointmentsAPI.getDoctorAppointments();
+      if (result.success) {
+        // Only show COMPLETED appointments that can have prescriptions
+        // This enforces the medical workflow: consultation first, then prescription
+        const completedAppointments = result.appointments.filter(
+          (apt) => apt.status === "completed"
+        );
+
+        console.log(
+          "Available appointments for prescriptions:",
+          completedAppointments
+        );
+        setDoctorAppointments(completedAppointments);
+
+        if (completedAppointments.length === 0) {
+          console.log("No completed appointments available for prescriptions");
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching appointments:", err);
+    }
+  };
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -356,11 +452,69 @@ const DoctorPrescriptions = () => {
     }));
   };
 
-  const handleSubmitPrescription = (e) => {
+  const handleSubmitPrescription = async (e) => {
     e.preventDefault();
-    // Mock submission - in real app, this would call an API
-    console.log("New prescription:", newPrescription);
-    setShowCreateForm(false);
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      // Find the selected appointment to get patient info
+      const selectedAppointment = doctorAppointments.find(
+        (apt) => apt._id === newPrescription.appointmentId
+      );
+
+      if (!selectedAppointment) {
+        setError("Please select an appointment");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Prepare prescription data for API
+      const prescriptionData = {
+        patientId: selectedAppointment.patient._id,
+        appointmentId: newPrescription.appointmentId,
+        diagnosis: newPrescription.diagnosis,
+        medications: newPrescription.medications.map((med) => ({
+          name: med.name,
+          dosage: med.dosage,
+          frequency: med.frequency,
+          duration: med.duration,
+          instructions: med.instructions,
+        })),
+        notes: newPrescription.notes,
+        followUpDate: newPrescription.followUpDate || null,
+      };
+
+      console.log("Creating prescription:", prescriptionData);
+
+      const result = await prescriptionsAPI.createPrescription(
+        prescriptionData
+      );
+
+      if (result.success) {
+        console.log("Prescription created successfully:", result.prescription);
+
+        // Close form and reset
+        setShowCreateForm(false);
+        resetForm();
+
+        // Refresh prescriptions list
+        fetchPrescriptions();
+
+        // Show success (you could add a toast notification here)
+        alert("Prescription created successfully!");
+      } else {
+        setError(result.message || "Failed to create prescription");
+      }
+    } catch (error) {
+      console.error("Error creating prescription:", error);
+      setError("Network error. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
     setNewPrescription({
       patientId: "",
       appointmentId: "",
@@ -378,13 +532,12 @@ const DoctorPrescriptions = () => {
       notes: "",
       followUpDate: "",
     });
-    // Show success message or redirect
   };
 
   const PrescriptionCard = ({ prescription }) => {
-    // TODO: Patient info will be populated from prescription.patient when using real API
     const patient = prescription.patient || {
       name: "Unknown Patient",
+      email: "N/A",
       phone: "N/A",
     };
 
@@ -394,20 +547,20 @@ const DoctorPrescriptions = () => {
           <div className="flex items-center">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-green-600 font-semibold text-lg">
-                {prescription.patientName.charAt(0)}
+                {patient.name.charAt(0)}
               </span>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                {prescription.patientName}
+                {patient.name}
               </h3>
-              <p className="text-gray-600">{patient?.email}</p>
+              <p className="text-gray-600">{patient.email}</p>
             </div>
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">Prescribed on</p>
             <p className="font-medium text-gray-900">
-              {formatDate(prescription.date)}
+              {formatDate(prescription.createdAt || prescription.issuedDate)}
             </p>
           </div>
         </div>
@@ -474,7 +627,10 @@ const DoctorPrescriptions = () => {
               <div>
                 <h2 className="text-2xl font-bold">Prescription Details</h2>
                 <p className="text-green-100">
-                  Prescribed on {formatDate(prescription.date)}
+                  Prescribed on{" "}
+                  {formatDate(
+                    prescription.createdAt || prescription.issuedDate
+                  )}
                 </p>
               </div>
               <button
@@ -503,7 +659,9 @@ const DoctorPrescriptions = () => {
               <h4 className="font-semibold text-gray-900 mb-2">
                 Patient Information
               </h4>
-              <p className="text-gray-700">{prescription.patientName}</p>
+              <p className="text-gray-700">
+                {prescription.patient?.name || "Unknown Patient"}
+              </p>
             </div>
 
             <div className="mb-6 pb-4 border-b">
@@ -617,11 +775,51 @@ const DoctorPrescriptions = () => {
       </div>
 
       {/* Prescriptions Grid */}
-      {prescriptions.length > 0 ? (
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="flex items-center justify-center">
+            <svg
+              className="animate-spin h-8 w-8 text-blue-600 mr-3"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span className="text-gray-600">Loading prescriptions...</span>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <div className="text-gray-400 text-6xl mb-4">⚠️</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Error loading prescriptions
+          </h3>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => fetchPrescriptions()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+          >
+            Try Again
+          </button>
+        </div>
+      ) : prescriptions.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {prescriptions.map((prescription) => (
             <PrescriptionCard
-              key={prescription.id}
+              key={prescription._id}
               prescription={prescription}
             />
           ))}
@@ -659,6 +857,8 @@ const DoctorPrescriptions = () => {
         handleRemoveMedication={handleRemoveMedication}
         handleSubmitPrescription={handleSubmitPrescription}
         doctorAppointments={doctorAppointments}
+        error={error}
+        isSubmitting={isSubmitting}
       />
     </div>
   );

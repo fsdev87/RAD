@@ -146,7 +146,7 @@ const App = () => {
     if (userType === "doctor") {
       switch (currentView) {
         case "doctor-appointments":
-          return <DoctorAppointments />;
+          return <DoctorAppointments setCurrentView={setCurrentView} />;
         case "doctor-prescriptions":
           return <DoctorPrescriptions />;
         default:

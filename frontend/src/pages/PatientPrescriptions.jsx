@@ -1,11 +1,35 @@
-import React, { useState } from "react";
-// TODO: Import prescriptionsAPI when implementing real API integration
+import React, { useState, useEffect } from "react";
+import { prescriptionsAPI } from "../services/api";
 
 const PatientPrescriptions = () => {
   const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // TODO: Replace with real API call to prescriptionsAPI.getPatientPrescriptions()
-  const prescriptions = []; // Placeholder - will be populated from database
+  // Fetch prescriptions on component mount
+  useEffect(() => {
+    fetchPrescriptions();
+  }, []);
+
+  const fetchPrescriptions = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const result = await prescriptionsAPI.getPatientPrescriptions();
+
+      if (result.success) {
+        setPrescriptions(result.prescriptions || []);
+      } else {
+        setError(result.message || "Failed to fetch prescriptions");
+      }
+    } catch (err) {
+      console.error("Error fetching prescriptions:", err);
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -16,7 +40,6 @@ const PatientPrescriptions = () => {
   };
 
   const PrescriptionCard = ({ prescription }) => {
-    // TODO: Doctor info will be populated from prescription.doctor when using real API
     const doctor = prescription.doctor || {
       name: "Unknown Doctor",
       specialization: "General",
@@ -31,20 +54,20 @@ const PatientPrescriptions = () => {
           <div className="flex items-center">
             <img
               src={doctor?.image || "/api/placeholder/50/50"}
-              alt={prescription.doctorName}
+              alt={doctor.name}
               className="w-10 h-10 rounded-full mr-3"
             />
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                {prescription.doctorName}
+                {doctor.name}
               </h3>
-              <p className="text-blue-600 text-sm">{doctor?.specialty}</p>
+              <p className="text-blue-600 text-sm">{doctor.specialization}</p>
             </div>
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">Prescribed on</p>
             <p className="font-medium text-gray-900">
-              {formatDate(prescription.date)}
+              {formatDate(prescription.createdAt || prescription.issuedDate)}
             </p>
           </div>
         </div>
@@ -94,7 +117,6 @@ const PatientPrescriptions = () => {
   const PrescriptionModal = ({ prescription, onClose }) => {
     if (!prescription) return null;
 
-    // TODO: Doctor info will be populated from prescription.doctor when using real API
     const doctor = prescription.doctor || {
       name: "Unknown Doctor",
       specialization: "General",
@@ -109,7 +131,10 @@ const PatientPrescriptions = () => {
               <div>
                 <h2 className="text-2xl font-bold">Medical Prescription</h2>
                 <p className="text-blue-100">
-                  Prescribed on {formatDate(prescription.date)}
+                  Prescribed on{" "}
+                  {formatDate(
+                    prescription.createdAt || prescription.issuedDate
+                  )}
                 </p>
               </div>
               <button
@@ -138,15 +163,17 @@ const PatientPrescriptions = () => {
             <div className="flex items-center mb-6 pb-4 border-b">
               <img
                 src={doctor?.image || "/api/placeholder/60/60"}
-                alt={prescription.doctorName}
+                alt={doctor.name}
                 className="w-15 h-15 rounded-full mr-4"
               />
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">
-                  {prescription.doctorName}
+                  Dr. {doctor.name}
                 </h3>
-                <p className="text-blue-600">{doctor?.specialty}</p>
-                <p className="text-gray-600 text-sm">{doctor?.qualification}</p>
+                <p className="text-blue-600">{doctor.specialization}</p>
+                <p className="text-gray-600 text-sm">
+                  {doctor.qualification || doctor.specialization}
+                </p>
               </div>
             </div>
 
@@ -155,7 +182,9 @@ const PatientPrescriptions = () => {
               <h4 className="font-semibold text-gray-900 mb-2">
                 Patient Information
               </h4>
-              <p className="text-gray-700">{prescription.patientName}</p>
+              <p className="text-gray-700">
+                {prescription.patient?.name || "You"}
+              </p>
             </div>
 
             {/* Diagnosis */}
@@ -255,7 +284,47 @@ const PatientPrescriptions = () => {
       </div>
 
       {/* Prescriptions Grid */}
-      {prescriptions.length > 0 ? (
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="flex items-center justify-center">
+            <svg
+              className="animate-spin h-8 w-8 text-blue-600 mr-3"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span className="text-gray-600">Loading prescriptions...</span>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <div className="text-gray-400 text-6xl mb-4">⚠️</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Error loading prescriptions
+          </h3>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => fetchPrescriptions()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+          >
+            Try Again
+          </button>
+        </div>
+      ) : prescriptions.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {prescriptions.map((prescription) => (
             <PrescriptionCard
@@ -273,9 +342,14 @@ const PatientPrescriptions = () => {
           <p className="text-gray-600 mb-6">
             Your prescriptions from doctors will appear here
           </p>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-            Book Appointment
-          </button>
+          <div className="space-x-4">
+            <button
+              onClick={() => fetchPrescriptions()}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
       )}
 

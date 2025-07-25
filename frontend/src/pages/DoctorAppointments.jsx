@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { appointmentsAPI } from "../services/api";
 
-const DoctorAppointments = () => {
+const DoctorAppointments = ({ setCurrentView }) => {
   const [selectedTab, setSelectedTab] = useState("today");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [allAppointments, setAllAppointments] = useState([]);
@@ -35,20 +35,35 @@ const DoctorAppointments = () => {
     fetchAppointments();
   }, []);
 
+  // Categorize appointments properly
   const today = new Date().toISOString().split("T")[0];
-  const todayAppointments = allAppointments.filter((apt) => apt.date === today);
-  const upcomingAppointments = allAppointments.filter(
-    (apt) =>
-      new Date(apt.date) > new Date() &&
+
+  const todayAppointments = allAppointments.filter((apt) => {
+    const appointmentDate = apt.date.split("T")[0]; // Get just the date part
+    return (
+      appointmentDate === today &&
       apt.status !== "completed" &&
       apt.status !== "cancelled"
-  );
-  const pastAppointments = allAppointments.filter(
-    (apt) =>
+    );
+  });
+
+  const upcomingAppointments = allAppointments.filter((apt) => {
+    const appointmentDate = apt.date.split("T")[0]; // Get just the date part
+    return (
+      appointmentDate > today &&
+      apt.status !== "completed" &&
+      apt.status !== "cancelled"
+    );
+  });
+
+  const pastAppointments = allAppointments.filter((apt) => {
+    const appointmentDate = apt.date.split("T")[0]; // Get just the date part
+    return (
       apt.status === "completed" ||
       apt.status === "cancelled" ||
-      new Date(apt.date) < new Date()
-  );
+      (appointmentDate < today && apt.status !== "completed")
+    );
+  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -350,7 +365,13 @@ const DoctorAppointments = () => {
                   Quick Actions
                 </h3>
                 <div className="space-y-3">
-                  <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition duration-200">
+                  <button
+                    onClick={() => {
+                      setSelectedAppointment(null);
+                      setCurrentView("doctor-prescriptions");
+                    }}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition duration-200"
+                  >
                     📝 Create Prescription
                   </button>
                   <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition duration-200">
