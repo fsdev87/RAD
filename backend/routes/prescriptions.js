@@ -53,10 +53,11 @@ router.post("/", auth, requireDoctor, async (req, res) => {
 
     await prescription.save();
 
-    // Update appointment with prescription reference
+    // Update appointment with prescription reference and auto-complete it
     if (appointmentId) {
       await Appointment.findByIdAndUpdate(appointmentId, {
         prescription: prescription._id,
+        status: "completed", // Auto-complete appointment when prescription is created
       });
     }
 
@@ -68,7 +69,7 @@ router.post("/", auth, requireDoctor, async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Prescription created successfully",
+      message: "Prescription created successfully and appointment completed",
       data: { prescription },
     });
   } catch (error) {

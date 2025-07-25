@@ -230,10 +230,10 @@ const DoctorAppointments = ({ setCurrentView }) => {
               Start Consultation
             </button>
             <button
-              onClick={() => handleStatusUpdate(appointment._id, "completed")}
-              className="px-4 py-2 border border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition duration-200"
+              onClick={() => setCurrentView && setCurrentView("prescriptions")}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-200"
             >
-              Mark Complete
+              Create Prescription
             </button>
             <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200">
               Reschedule
@@ -278,7 +278,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
     );
   };
 
-  const ConsultationModal = ({ appointment, onClose }) => {
+  const ConsultationModal = ({ appointment, onClose, setCurrentView }) => {
     if (!appointment) return null;
 
     const patient = appointment.patient || { name: "Unknown Patient" };
@@ -396,12 +396,12 @@ const DoctorAppointments = ({ setCurrentView }) => {
               </button>
               <button
                 onClick={() => {
-                  handleStatusUpdate(appointment._id, "completed");
                   onClose();
+                  setCurrentView && setCurrentView("doctor-prescriptions");
                 }}
                 className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-200"
               >
-                Complete Consultation
+                Create Prescription
               </button>
             </div>
           </div>
@@ -627,6 +627,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
       <ConsultationModal
         appointment={selectedAppointment}
         onClose={() => setSelectedAppointment(null)}
+        setCurrentView={setCurrentView}
       />
     </div>
   );

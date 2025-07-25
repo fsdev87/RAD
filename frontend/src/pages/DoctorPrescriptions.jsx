@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { prescriptionsAPI, appointmentsAPI } from "../services/api";
+import Toast from "../components/Toast";
 
 // Separate component to prevent re-creation on every render
 const CreatePrescriptionForm = ({
@@ -54,7 +55,7 @@ const CreatePrescriptionForm = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Completed Consultation
+                Select Confirmed Consultation
               </label>
               <select
                 name="appointmentId"
@@ -63,9 +64,9 @@ const CreatePrescriptionForm = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               >
-                <option value="">Choose a completed consultation...</option>
+                <option value="">Choose a confirmed consultation...</option>
                 {doctorAppointments.length === 0 ? (
-                  <option disabled>No completed consultations available</option>
+                  <option disabled>No confirmed consultations available</option>
                 ) : (
                   doctorAppointments.map((apt) => (
                     <option key={apt._id} value={apt._id}>
@@ -78,8 +79,7 @@ const CreatePrescriptionForm = ({
               </select>
               {doctorAppointments.length === 0 && (
                 <p className="mt-2 text-sm text-gray-600">
-                  💡 Complete patient consultations first to create
-                  prescriptions
+                  💡 Confirm patient consultations first to create prescriptions
                 </p>
               )}
             </div>
@@ -124,20 +124,42 @@ const CreatePrescriptionForm = ({
               </button>
             </div>
 
-            {newPrescription.medications.map((medication, index) => (
-              <div
-                key={medication.id}
-                className="bg-gray-50 rounded-lg p-4 mb-4"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <h4 className="font-medium text-gray-900">
-                    Medication {index + 1}
-                  </h4>
-                  {newPrescription.medications.length > 1 && (
+            {newPrescription.medications.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                <svg
+                  className="w-12 h-12 mx-auto mb-3 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                <p className="mb-2 font-medium">No medications added yet</p>
+                <p className="text-sm">
+                  Click "Add Medication" to prescribe medicines, or submit
+                  without medications if none are needed
+                </p>
+              </div>
+            ) : (
+              newPrescription.medications.map((medication, index) => (
+                <div
+                  key={medication.id}
+                  className="bg-gray-50 rounded-lg p-4 mb-4"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <h4 className="font-medium text-gray-900">
+                      Medication {index + 1}
+                    </h4>
                     <button
                       type="button"
                       onClick={() => handleRemoveMedication(medication.id)}
                       className="text-red-600 hover:text-red-700"
+                      title="Remove this medication"
                     >
                       <svg
                         className="w-5 h-5"
@@ -153,118 +175,120 @@ const CreatePrescriptionForm = ({
                         />
                       </svg>
                     </button>
-                  )}
-                </div>
+                  </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Medicine Name
-                    </label>
-                    <input
-                      type="text"
-                      value={medication.name}
-                      onChange={(e) =>
-                        handleMedicationChange(
-                          medication.id,
-                          "name",
-                          e.target.value
-                        )
-                      }
-                      placeholder="e.g., Paracetamol"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Medicine Name
+                      </label>
+                      <input
+                        type="text"
+                        value={medication.name}
+                        onChange={(e) =>
+                          handleMedicationChange(
+                            medication.id,
+                            "name",
+                            e.target.value
+                          )
+                        }
+                        placeholder="e.g., Paracetamol"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Dosage
+                      </label>
+                      <input
+                        type="text"
+                        value={medication.dosage}
+                        onChange={(e) =>
+                          handleMedicationChange(
+                            medication.id,
+                            "dosage",
+                            e.target.value
+                          )
+                        }
+                        placeholder="e.g., 500mg"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Frequency
+                      </label>
+                      <select
+                        value={medication.frequency}
+                        onChange={(e) =>
+                          handleMedicationChange(
+                            medication.id,
+                            "frequency",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      >
+                        <option value="">Select frequency</option>
+                        <option value="Once daily">Once daily</option>
+                        <option value="Twice daily">Twice daily</option>
+                        <option value="Three times daily">
+                          Three times daily
+                        </option>
+                        <option value="Four times daily">
+                          Four times daily
+                        </option>
+                        <option value="As needed">As needed</option>
+                        <option value="Every 4 hours">Every 4 hours</option>
+                        <option value="Every 6 hours">Every 6 hours</option>
+                        <option value="Every 8 hours">Every 8 hours</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Duration
+                      </label>
+                      <input
+                        type="text"
+                        value={medication.duration}
+                        onChange={(e) =>
+                          handleMedicationChange(
+                            medication.id,
+                            "duration",
+                            e.target.value
+                          )
+                        }
+                        placeholder="e.g., 7 days"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dosage
-                    </label>
-                    <input
-                      type="text"
-                      value={medication.dosage}
-                      onChange={(e) =>
-                        handleMedicationChange(
-                          medication.id,
-                          "dosage",
-                          e.target.value
-                        )
-                      }
-                      placeholder="e.g., 500mg"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Frequency
-                    </label>
-                    <select
-                      value={medication.frequency}
-                      onChange={(e) =>
-                        handleMedicationChange(
-                          medication.id,
-                          "frequency",
-                          e.target.value
-                        )
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Select frequency</option>
-                      <option value="Once daily">Once daily</option>
-                      <option value="Twice daily">Twice daily</option>
-                      <option value="Three times daily">
-                        Three times daily
-                      </option>
-                      <option value="Four times daily">Four times daily</option>
-                      <option value="As needed">As needed</option>
-                      <option value="Every 4 hours">Every 4 hours</option>
-                      <option value="Every 6 hours">Every 6 hours</option>
-                      <option value="Every 8 hours">Every 8 hours</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Duration
-                    </label>
-                    <input
-                      type="text"
-                      value={medication.duration}
-                      onChange={(e) =>
-                        handleMedicationChange(
-                          medication.id,
-                          "duration",
-                          e.target.value
-                        )
-                      }
-                      placeholder="e.g., 7 days"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Special Instructions
-                  </label>
-                  <textarea
-                    value={medication.instructions}
-                    onChange={(e) =>
-                      handleMedicationChange(
-                        medication.id,
-                        "instructions",
-                        e.target.value
-                      )
-                    }
-                    rows="2"
-                    placeholder="e.g., Take with food, Take on empty stomach..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Special Instructions
+                    </label>
+                    <textarea
+                      value={medication.instructions}
+                      onChange={(e) =>
+                        handleMedicationChange(
+                          medication.id,
+                          "instructions",
+                          e.target.value
+                        )
+                      }
+                      rows="2"
+                      placeholder="e.g., Take with food, Take on empty stomach..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="mb-6">
@@ -337,20 +361,16 @@ const DoctorPrescriptions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState({
+    message: "",
+    type: "success",
+    isVisible: false,
+  });
   const [newPrescription, setNewPrescription] = useState({
     patientId: "",
     appointmentId: "",
     diagnosis: "",
-    medications: [
-      {
-        id: Date.now(), // Unique identifier
-        name: "",
-        dosage: "",
-        frequency: "",
-        duration: "",
-        instructions: "",
-      },
-    ],
+    medications: [], // Start with empty medications array - add as needed
     notes: "",
     followUpDate: "",
   });
@@ -360,6 +380,14 @@ const DoctorPrescriptions = () => {
     fetchPrescriptions();
     fetchDoctorAppointments();
   }, []);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type, isVisible: true });
+  };
+
+  const hideToast = () => {
+    setToast((prev) => ({ ...prev, isVisible: false }));
+  };
 
   const fetchPrescriptions = async () => {
     try {
@@ -382,20 +410,20 @@ const DoctorPrescriptions = () => {
     try {
       const result = await appointmentsAPI.getDoctorAppointments();
       if (result.success) {
-        // Only show COMPLETED appointments that can have prescriptions
-        // This enforces the medical workflow: consultation first, then prescription
-        const completedAppointments = result.appointments.filter(
-          (apt) => apt.status === "completed"
+        // Show CONFIRMED appointments that can have prescriptions created
+        // New workflow: confirmed appointment -> create prescription -> auto-complete
+        const confirmedAppointments = result.appointments.filter(
+          (apt) => apt.status === "confirmed"
         );
 
         console.log(
           "Available appointments for prescriptions:",
-          completedAppointments
+          confirmedAppointments
         );
-        setDoctorAppointments(completedAppointments);
+        setDoctorAppointments(confirmedAppointments);
 
-        if (completedAppointments.length === 0) {
-          console.log("No completed appointments available for prescriptions");
+        if (confirmedAppointments.length === 0) {
+          console.log("No confirmed appointments available for prescriptions");
         }
       }
     } catch (err) {
@@ -465,6 +493,7 @@ const DoctorPrescriptions = () => {
 
       if (!selectedAppointment) {
         setError("Please select an appointment");
+        showToast("Please select an appointment", "error");
         setIsSubmitting(false);
         return;
       }
@@ -494,21 +523,43 @@ const DoctorPrescriptions = () => {
       if (result.success) {
         console.log("Prescription created successfully:", result.prescription);
 
+        // Auto-complete the appointment after prescription creation
+        try {
+          const updateResult = await appointmentsAPI.updateAppointmentStatus(
+            newPrescription.appointmentId,
+            "completed"
+          );
+          if (updateResult.success) {
+            console.log("Appointment auto-completed successfully");
+          }
+        } catch (updateError) {
+          console.error("Error auto-completing appointment:", updateError);
+          // Don't fail the prescription creation if status update fails
+        }
+
         // Close form and reset
         setShowCreateForm(false);
         resetForm();
 
-        // Refresh prescriptions list
+        // Refresh prescriptions list and appointments
         fetchPrescriptions();
+        fetchDoctorAppointments(); // Refresh to remove completed appointment from list
 
-        // Show success (you could add a toast notification here)
-        alert("Prescription created successfully!");
+        // Show success toast notification
+        const medicationCount = newPrescription.medications.length;
+        const successMessage =
+          medicationCount > 0
+            ? `✅ Prescription created with ${medicationCount} medication(s). Appointment completed!`
+            : "✅ Prescription created successfully. Appointment completed!";
+        showToast(successMessage, "success");
       } else {
         setError(result.message || "Failed to create prescription");
+        showToast(result.message || "Failed to create prescription", "error");
       }
     } catch (error) {
       console.error("Error creating prescription:", error);
       setError("Network error. Please try again.");
+      showToast("Network error. Please try again.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -519,16 +570,7 @@ const DoctorPrescriptions = () => {
       patientId: "",
       appointmentId: "",
       diagnosis: "",
-      medications: [
-        {
-          id: Date.now(),
-          name: "",
-          dosage: "",
-          frequency: "",
-          duration: "",
-          instructions: "",
-        },
-      ],
+      medications: [], // Start with empty medications array - add as needed
       notes: "",
       followUpDate: "",
     });
@@ -859,6 +901,14 @@ const DoctorPrescriptions = () => {
         doctorAppointments={doctorAppointments}
         error={error}
         isSubmitting={isSubmitting}
+      />
+
+      {/* Toast notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
       />
     </div>
   );
