@@ -486,4 +486,153 @@ export const apiUtils = {
   },
 };
 
+// Medical Records API calls
+export const medicalRecordsAPI = {
+  // Get patient medical records
+  getPatientRecords: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.doctorId) params.append("doctorId", filters.doctorId);
+      if (filters.condition) params.append("condition", filters.condition);
+      if (filters.page) params.append("page", filters.page);
+      if (filters.limit) params.append("limit", filters.limit);
+
+      const response = await api.get(`/medical-records/patient?${params}`);
+      if (response.data.success) {
+        return {
+          success: true,
+          records: response.data.data.records,
+          pagination: response.data.data.pagination,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch medical records",
+      };
+    }
+  },
+
+  // Get doctor medical records
+  getDoctorRecords: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.patientName)
+        params.append("patientName", filters.patientName);
+      if (filters.diagnosis) params.append("diagnosis", filters.diagnosis);
+      if (filters.page) params.append("page", filters.page);
+      if (filters.limit) params.append("limit", filters.limit);
+
+      const response = await api.get(`/medical-records/doctor?${params}`);
+      if (response.data.success) {
+        return {
+          success: true,
+          records: response.data.data.records,
+          pagination: response.data.data.pagination,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch medical records",
+      };
+    }
+  },
+
+  // Get medical records for specific patient (doctor view)
+  getPatientRecordsForDoctor: async (patientId) => {
+    try {
+      const response = await api.get(`/medical-records/patient/${patientId}`);
+      if (response.data.success) {
+        return {
+          success: true,
+          records: response.data.data.records,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch patient records",
+      };
+    }
+  },
+
+  // Create medical record (doctor)
+  createRecord: async (recordData) => {
+    try {
+      const response = await api.post("/medical-records", recordData);
+      if (response.data.success) {
+        return { success: true, record: response.data.data.record };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to create medical record",
+      };
+    }
+  },
+
+  // Update medical record (doctor)
+  updateRecord: async (recordId, recordData) => {
+    try {
+      const response = await api.put(
+        `/medical-records/${recordId}`,
+        recordData
+      );
+      if (response.data.success) {
+        return { success: true, record: response.data.data.record };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to update medical record",
+      };
+    }
+  },
+
+  // Get medical record by ID
+  getRecordById: async (recordId) => {
+    try {
+      const response = await api.get(`/medical-records/${recordId}`);
+      if (response.data.success) {
+        return { success: true, record: response.data.data.record };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch medical record",
+      };
+    }
+  },
+
+  // Delete medical record (doctor)
+  deleteRecord: async (recordId) => {
+    try {
+      const response = await api.delete(`/medical-records/${recordId}`);
+      if (response.data.success) {
+        return { success: true, message: response.data.message };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to delete medical record",
+      };
+    }
+  },
+};
+
 export default api;

@@ -48,17 +48,17 @@ const PatientAppointments = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmed":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/20 text-green-300 border border-green-500/30";
       case "scheduled":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30";
       case "completed":
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-500/20 text-gray-300 border border-gray-500/30";
       case "cancelled":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/20 text-red-300 border border-red-500/30";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-500/20 text-gray-300 border border-gray-500/30";
     }
   };
 
@@ -80,7 +80,7 @@ const PatientAppointments = () => {
 
   const AppointmentCard = ({ appointment }) => {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300 shadow-xl">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center">
             <img
@@ -90,13 +90,13 @@ const PatientAppointments = () => {
               alt={
                 appointment.doctor?.name || appointment.doctorName || "Doctor"
               }
-              className="w-12 h-12 rounded-full mr-4"
+              className="w-12 h-12 rounded-full mr-4 ring-2 ring-white/20"
             />
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-white">
                 {appointment.doctor?.name || appointment.doctorName || "Doctor"}
               </h3>
-              <p className="text-blue-600 font-medium">
+              <p className="text-blue-300 font-medium">
                 {appointment.doctor?.specialization || "General Medicine"}
               </p>
             </div>
@@ -126,7 +126,7 @@ const PatientAppointments = () => {
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span className="text-gray-700">
+            <span className="text-gray-300">
               {formatDate(appointment.date)}
             </span>
           </div>
@@ -144,34 +144,34 @@ const PatientAppointments = () => {
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span className="text-gray-700">
+            <span className="text-gray-300">
               {formatTime(appointment.time)}
             </span>
           </div>
         </div>
 
-        <div className="border-t pt-4">
+        <div className="border-t border-white/20 pt-4">
           <div className="mb-2">
-            <span className="text-sm font-medium text-gray-600">Reason: </span>
-            <span className="text-gray-900">{appointment.reason}</span>
+            <span className="text-sm font-medium text-gray-400">Reason: </span>
+            <span className="text-gray-200">{appointment.reason}</span>
           </div>
           {appointment.notes && (
             <div>
-              <span className="text-sm font-medium text-gray-600">Notes: </span>
-              <span className="text-gray-900">{appointment.notes}</span>
+              <span className="text-sm font-medium text-gray-400">Notes: </span>
+              <span className="text-gray-200">{appointment.notes}</span>
             </div>
           )}
         </div>
 
         {appointment.status === "confirmed" && (
           <div className="mt-4 flex space-x-3">
-            <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+            <button className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-2 px-4 rounded-lg transition duration-200 shadow-lg">
               Join Video Call
             </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200">
+            <button className="px-4 py-2 border border-white/30 text-gray-300 rounded-lg hover:bg-white/10 transition duration-200">
               Reschedule
             </button>
-            <button className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition duration-200">
+            <button className="px-4 py-2 border border-red-500/30 text-red-300 rounded-lg hover:bg-red-500/10 transition duration-200">
               Cancel
             </button>
           </div>
@@ -181,135 +181,158 @@ const PatientAppointments = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          My Appointments
-        </h1>
-        <p className="text-gray-600">
-          Manage your upcoming and past appointments
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-purple-900">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex items-center mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl">
+              <svg
+                className="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 className="heading-gradient text-4xl font-bold mb-2">
+                My Appointments
+              </h1>
+              <p className="text-gray-300 text-lg">
+                Manage your upcoming and past appointments
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-2xl backdrop-blur-sm">
+            <p className="text-red-300">{error}</p>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
+            <span className="ml-3 text-gray-300">Loading appointments...</span>
+          </div>
+        ) : (
+          <>
+            {/* Tab Navigation */}
+            <div className="mb-8">
+              <div className="border-b border-white/20">
+                <nav className="-mb-px flex space-x-8">
+                  <button
+                    onClick={() => setSelectedTab("upcoming")}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      selectedTab === "upcoming"
+                        ? "border-blue-400 text-blue-300"
+                        : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-400"
+                    }`}
+                  >
+                    Upcoming ({upcomingAppointments.length})
+                  </button>
+                  <button
+                    onClick={() => setSelectedTab("past")}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      selectedTab === "past"
+                        ? "border-blue-400 text-blue-300"
+                        : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-400"
+                    }`}
+                  >
+                    Past Appointments ({pastAppointments.length})
+                  </button>
+                </nav>
+              </div>
+            </div>
+
+            {/* Appointments List */}
+            <div className="space-y-6">
+              {selectedTab === "upcoming" && (
+                <>
+                  {upcomingAppointments.length > 0 ? (
+                    upcomingAppointments.map((appointment) => (
+                      <AppointmentCard
+                        key={appointment.id}
+                        appointment={appointment}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-gray-400 text-6xl mb-4">📅</div>
+                      <h3 className="text-lg font-medium text-white mb-2">
+                        No upcoming appointments
+                      </h3>
+                      <p className="text-gray-300 mb-6">
+                        Book an appointment with one of our doctors
+                      </p>
+                      <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg shadow-lg">
+                        Find Doctors
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {selectedTab === "past" && (
+                <>
+                  {pastAppointments.length > 0 ? (
+                    pastAppointments.map((appointment) => (
+                      <AppointmentCard
+                        key={appointment.id}
+                        appointment={appointment}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-gray-400 text-6xl mb-4">📋</div>
+                      <h3 className="text-lg font-medium text-white mb-2">
+                        No past appointments
+                      </h3>
+                      <p className="text-gray-300">
+                        Your completed appointments will appear here
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="mt-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">
+              <h3 className="text-lg font-medium text-white mb-4">
+                Quick Actions
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg p-4 text-center transition duration-200 backdrop-blur-sm">
+                  <div className="text-2xl mb-2">🩺</div>
+                  <p className="font-medium text-gray-200">
+                    Book New Appointment
+                  </p>
+                </button>
+                <button className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg p-4 text-center transition duration-200 backdrop-blur-sm">
+                  <div className="text-2xl mb-2">💊</div>
+                  <p className="font-medium text-gray-200">
+                    View Prescriptions
+                  </p>
+                </button>
+                <button className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg p-4 text-center transition duration-200 backdrop-blur-sm">
+                  <div className="text-2xl mb-2">📋</div>
+                  <p className="font-medium text-gray-200">Medical Records</p>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* Loading State */}
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Loading appointments...</span>
-        </div>
-      ) : (
-        <>
-          {/* Tab Navigation */}
-          <div className="mb-8">
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex space-x-8">
-                <button
-                  onClick={() => setSelectedTab("upcoming")}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    selectedTab === "upcoming"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  Upcoming ({upcomingAppointments.length})
-                </button>
-                <button
-                  onClick={() => setSelectedTab("past")}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    selectedTab === "past"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  Past Appointments ({pastAppointments.length})
-                </button>
-              </nav>
-            </div>
-          </div>
-
-          {/* Appointments List */}
-          <div className="space-y-6">
-            {selectedTab === "upcoming" && (
-              <>
-                {upcomingAppointments.length > 0 ? (
-                  upcomingAppointments.map((appointment) => (
-                    <AppointmentCard
-                      key={appointment.id}
-                      appointment={appointment}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 text-6xl mb-4">📅</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      No upcoming appointments
-                    </h3>
-                    <p className="text-gray-600 mb-6">
-                      Book an appointment with one of our doctors
-                    </p>
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-                      Find Doctors
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-
-            {selectedTab === "past" && (
-              <>
-                {pastAppointments.length > 0 ? (
-                  pastAppointments.map((appointment) => (
-                    <AppointmentCard
-                      key={appointment.id}
-                      appointment={appointment}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 text-6xl mb-4">📋</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      No past appointments
-                    </h3>
-                    <p className="text-gray-600">
-                      Your completed appointments will appear here
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mt-12 bg-blue-50 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Quick Actions
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button className="bg-white hover:bg-gray-50 border border-gray-200 rounded-lg p-4 text-center transition duration-200">
-                <div className="text-2xl mb-2">🩺</div>
-                <p className="font-medium text-gray-900">
-                  Book New Appointment
-                </p>
-              </button>
-              <button className="bg-white hover:bg-gray-50 border border-gray-200 rounded-lg p-4 text-center transition duration-200">
-                <div className="text-2xl mb-2">💊</div>
-                <p className="font-medium text-gray-900">View Prescriptions</p>
-              </button>
-              <button className="bg-white hover:bg-gray-50 border border-gray-200 rounded-lg p-4 text-center transition duration-200">
-                <div className="text-2xl mb-2">📋</div>
-                <p className="font-medium text-gray-900">Medical Records</p>
-              </button>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };

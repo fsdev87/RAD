@@ -785,131 +785,150 @@ const DoctorPrescriptions = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            My Prescriptions
-          </h1>
-          <p className="text-gray-600">
-            Manage and create patient prescriptions
-          </p>
-        </div>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 flex items-center"
-        >
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          New Prescription
-        </button>
-      </div>
-
-      {/* Prescriptions Grid */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="flex items-center justify-center">
-            <svg
-              className="animate-spin h-8 w-8 text-blue-600 mr-3"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-purple-900">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl">
+              <svg
+                className="w-6 h-6 text-white"
+                fill="none"
                 stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <span className="text-gray-600">Loading prescriptions...</span>
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 8.172V5L8 4z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 className="heading-gradient text-4xl font-bold mb-2">
+                My Prescriptions
+              </h1>
+              <p className="text-gray-300 text-lg">
+                Manage and create patient prescriptions
+              </p>
+            </div>
           </div>
-        </div>
-      ) : error ? (
-        <div className="text-center py-12">
-          <div className="text-gray-400 text-6xl mb-4">⚠️</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Error loading prescriptions
-          </h3>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <button
-            onClick={() => fetchPrescriptions()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-          >
-            Try Again
-          </button>
-        </div>
-      ) : prescriptions.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {prescriptions.map((prescription) => (
-            <PrescriptionCard
-              key={prescription._id}
-              prescription={prescription}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <div className="text-gray-400 text-6xl mb-4">📝</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No prescriptions created yet
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Start by creating your first prescription
-          </p>
           <button
             onClick={() => setShowCreateForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 flex items-center"
           >
-            Create Prescription
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            New Prescription
           </button>
         </div>
-      )}
 
-      {/* Modals */}
-      <PrescriptionModal
-        prescription={selectedPrescription}
-        onClose={() => setSelectedPrescription(null)}
-      />
-      <CreatePrescriptionForm
-        showCreateForm={showCreateForm}
-        setShowCreateForm={setShowCreateForm}
-        newPrescription={newPrescription}
-        handleInputChange={handleInputChange}
-        handleMedicationChange={handleMedicationChange}
-        handleAddMedication={handleAddMedication}
-        handleRemoveMedication={handleRemoveMedication}
-        handleSubmitPrescription={handleSubmitPrescription}
-        doctorAppointments={doctorAppointments}
-        error={error}
-        isSubmitting={isSubmitting}
-      />
+        {/* Prescriptions Grid */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="flex items-center justify-center">
+              <svg
+                className="animate-spin h-8 w-8 text-blue-600 mr-3"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span className="text-gray-600">Loading prescriptions...</span>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">⚠️</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Error loading prescriptions
+            </h3>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={() => fetchPrescriptions()}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : prescriptions.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {prescriptions.map((prescription) => (
+              <PrescriptionCard
+                key={prescription._id}
+                prescription={prescription}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">📝</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No prescriptions created yet
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Start by creating your first prescription
+            </p>
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+            >
+              Create Prescription
+            </button>
+          </div>
+        )}
 
-      {/* Toast notification */}
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.isVisible}
-        onClose={hideToast}
-      />
+        {/* Modals */}
+        <PrescriptionModal
+          prescription={selectedPrescription}
+          onClose={() => setSelectedPrescription(null)}
+        />
+        <CreatePrescriptionForm
+          showCreateForm={showCreateForm}
+          setShowCreateForm={setShowCreateForm}
+          newPrescription={newPrescription}
+          handleInputChange={handleInputChange}
+          handleMedicationChange={handleMedicationChange}
+          handleAddMedication={handleAddMedication}
+          handleRemoveMedication={handleRemoveMedication}
+          handleSubmitPrescription={handleSubmitPrescription}
+          doctorAppointments={doctorAppointments}
+          error={error}
+          isSubmitting={isSubmitting}
+        />
+
+        {/* Toast notification */}
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          isVisible={toast.isVisible}
+          onClose={hideToast}
+        />
+      </div>
     </div>
   );
 };

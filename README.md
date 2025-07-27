@@ -40,7 +40,7 @@ npm run dev
 
 ```bash
 cd backend
-node comprehensive-seed.js
+node seed.js
 ```
 
 ## 🏗️ Project Structure
