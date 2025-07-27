@@ -19,14 +19,14 @@ const CreatePrescriptionForm = ({
   if (!showCreateForm) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="bg-blue-600 text-white p-6 rounded-t-lg">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Create New Prescription</h2>
             <button
               onClick={() => setShowCreateForm(false)}
-              className="text-white hover:text-gray-200 p-1"
+              className="text-white hover:text-gray-200 p-1 hover:bg-white/10 rounded-lg transition-colors"
             >
               <svg
                 className="w-6 h-6"
@@ -47,29 +47,37 @@ const CreatePrescriptionForm = ({
 
         <form onSubmit={handleSubmitPrescription} className="p-6">
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">{error}</p>
+            <div className="mb-4 p-4 bg-red-500/20 border border-red-500/40 rounded-xl">
+              <p className="text-red-300 text-sm">{error}</p>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-white/80 mb-2">
                 Select Confirmed Consultation
               </label>
               <select
                 name="appointmentId"
                 value={newPrescription.appointmentId}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               >
-                <option value="">Choose a confirmed consultation...</option>
+                <option value="" className="bg-gray-800">
+                  Choose a confirmed consultation...
+                </option>
                 {doctorAppointments.length === 0 ? (
-                  <option disabled>No confirmed consultations available</option>
+                  <option disabled className="bg-gray-800">
+                    No confirmed consultations available
+                  </option>
                 ) : (
                   doctorAppointments.map((apt) => (
-                    <option key={apt._id} value={apt._id}>
+                    <option
+                      key={apt._id}
+                      value={apt._id}
+                      className="bg-gray-800"
+                    >
                       {apt.patient?.name || "Unknown Patient"} -{" "}
                       {new Date(apt.date).toLocaleDateString()} at {apt.time} (
                       {apt.reason})
@@ -78,13 +86,13 @@ const CreatePrescriptionForm = ({
                 )}
               </select>
               {doctorAppointments.length === 0 && (
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-white/60">
                   💡 Confirm patient consultations first to create prescriptions
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-white/80 mb-2">
                 Follow-up Date
               </label>
               <input
@@ -92,13 +100,13 @@ const CreatePrescriptionForm = ({
                 name="followUpDate"
                 value={newPrescription.followUpDate}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white/80 mb-2">
               Diagnosis
             </label>
             <textarea
@@ -107,27 +115,27 @@ const CreatePrescriptionForm = ({
               onChange={handleInputChange}
               rows="3"
               placeholder="Enter diagnosis..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
           </div>
 
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Medications</h3>
+              <h3 className="text-lg font-medium text-white">Medications</h3>
               <button
                 type="button"
                 onClick={handleAddMedication}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200"
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded-xl transition-all duration-300 font-medium"
               >
                 + Add Medication
               </button>
             </div>
 
             {newPrescription.medications.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+              <div className="text-center py-8 text-white/60 border-2 border-dashed border-white/20 rounded-xl">
                 <svg
-                  className="w-12 h-12 mx-auto mb-3 text-gray-400"
+                  className="w-12 h-12 mx-auto mb-3 text-white/40"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -139,7 +147,9 @@ const CreatePrescriptionForm = ({
                     d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                   />
                 </svg>
-                <p className="mb-2 font-medium">No medications added yet</p>
+                <p className="mb-2 font-medium text-white">
+                  No medications added yet
+                </p>
                 <p className="text-sm">
                   Click "Add Medication" to prescribe medicines, or submit
                   without medications if none are needed
@@ -149,16 +159,16 @@ const CreatePrescriptionForm = ({
               newPrescription.medications.map((medication, index) => (
                 <div
                   key={medication.id}
-                  className="bg-gray-50 rounded-lg p-4 mb-4"
+                  className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <h4 className="font-medium text-gray-900">
+                    <h4 className="font-medium text-white">
                       Medication {index + 1}
                     </h4>
                     <button
                       type="button"
                       onClick={() => handleRemoveMedication(medication.id)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-400 hover:text-red-300 transition-colors"
                       title="Remove this medication"
                     >
                       <svg
@@ -179,7 +189,7 @@ const CreatePrescriptionForm = ({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-white/80 mb-1">
                         Medicine Name
                       </label>
                       <input
@@ -193,12 +203,12 @@ const CreatePrescriptionForm = ({
                           )
                         }
                         placeholder="e.g., Paracetamol"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-white/80 mb-1">
                         Dosage
                       </label>
                       <input
@@ -212,12 +222,12 @@ const CreatePrescriptionForm = ({
                           )
                         }
                         placeholder="e.g., 500mg"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-white/80 mb-1">
                         Frequency
                       </label>
                       <select
@@ -229,26 +239,46 @@ const CreatePrescriptionForm = ({
                             e.target.value
                           )
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       >
-                        <option value="">Select frequency</option>
-                        <option value="Once daily">Once daily</option>
-                        <option value="Twice daily">Twice daily</option>
-                        <option value="Three times daily">
+                        <option value="" className="bg-gray-800">
+                          Select frequency
+                        </option>
+                        <option value="Once daily" className="bg-gray-800">
+                          Once daily
+                        </option>
+                        <option value="Twice daily" className="bg-gray-800">
+                          Twice daily
+                        </option>
+                        <option
+                          value="Three times daily"
+                          className="bg-gray-800"
+                        >
                           Three times daily
                         </option>
-                        <option value="Four times daily">
+                        <option
+                          value="Four times daily"
+                          className="bg-gray-800"
+                        >
                           Four times daily
                         </option>
-                        <option value="As needed">As needed</option>
-                        <option value="Every 4 hours">Every 4 hours</option>
-                        <option value="Every 6 hours">Every 6 hours</option>
-                        <option value="Every 8 hours">Every 8 hours</option>
+                        <option value="As needed" className="bg-gray-800">
+                          As needed
+                        </option>
+                        <option value="Every 4 hours" className="bg-gray-800">
+                          Every 4 hours
+                        </option>
+                        <option value="Every 6 hours" className="bg-gray-800">
+                          Every 6 hours
+                        </option>
+                        <option value="Every 8 hours" className="bg-gray-800">
+                          Every 8 hours
+                        </option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-white/80 mb-1">
                         Duration
                       </label>
                       <input
@@ -262,14 +292,14 @@ const CreatePrescriptionForm = ({
                           )
                         }
                         placeholder="e.g., 7 days"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-white/80 mb-1">
                       Special Instructions
                     </label>
                     <textarea
@@ -283,7 +313,7 @@ const CreatePrescriptionForm = ({
                       }
                       rows="2"
                       placeholder="e.g., Take with food, Take on empty stomach..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -292,7 +322,7 @@ const CreatePrescriptionForm = ({
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white/80 mb-2">
               Additional Notes
             </label>
             <textarea
@@ -301,7 +331,7 @@ const CreatePrescriptionForm = ({
               onChange={handleInputChange}
               rows="3"
               placeholder="Any additional notes or instructions..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
@@ -309,14 +339,14 @@ const CreatePrescriptionForm = ({
             <button
               type="button"
               onClick={() => setShowCreateForm(false)}
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200"
+              className="px-6 py-2 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-all duration-300 text-white font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition duration-200 flex items-center"
+              className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 text-white rounded-xl transition-all duration-300 flex items-center font-medium"
             >
               {isSubmitting ? (
                 <>
@@ -584,47 +614,53 @@ const DoctorPrescriptions = () => {
     };
 
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300 shadow-xl">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-              <span className="text-green-600 font-semibold text-lg">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-4">
+              <span className="text-white font-semibold text-lg">
                 {patient.name.charAt(0)}
               </span>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-white">
                 {patient.name}
               </h3>
-              <p className="text-gray-600">{patient.email}</p>
+              <p className="text-white/70">{patient.email}</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-600">Prescribed on</p>
-            <p className="font-medium text-gray-900">
+            <p className="text-sm text-white/70">Prescribed on</p>
+            <p className="font-medium text-white">
               {formatDate(prescription.createdAt || prescription.issuedDate)}
             </p>
           </div>
         </div>
 
         <div className="mb-4">
-          <p className="text-sm font-medium text-gray-600">Diagnosis:</p>
-          <p className="text-gray-900">{prescription.diagnosis}</p>
+          <p className="text-sm font-medium text-white/70">Diagnosis:</p>
+          <p className="text-white">{prescription.diagnosis}</p>
         </div>
 
         <div className="mb-4">
-          <p className="text-sm font-medium text-gray-600 mb-2">
+          <p className="text-sm font-medium text-white/70 mb-2">
             Medications ({prescription.medications.length}):
           </p>
           <div className="space-y-1">
             {prescription.medications.slice(0, 2).map((med, index) => (
-              <div key={index} className="text-sm bg-green-50 rounded p-2">
-                <span className="font-medium">{med.name}</span> - {med.dosage},{" "}
-                {med.frequency}
+              <div
+                key={index}
+                className="text-sm bg-blue-500/20 border border-blue-500/30 rounded-lg p-2"
+              >
+                <span className="font-medium text-blue-300">{med.name}</span>
+                <span className="text-white/80">
+                  {" "}
+                  - {med.dosage}, {med.frequency}
+                </span>
               </div>
             ))}
             {prescription.medications.length > 2 && (
-              <p className="text-sm text-blue-600">
+              <p className="text-sm text-blue-300">
                 +{prescription.medications.length - 2} more medications
               </p>
             )}
@@ -632,10 +668,12 @@ const DoctorPrescriptions = () => {
         </div>
 
         {prescription.followUpDate && (
-          <div className="border-t pt-3 mb-4">
-            <p className="text-sm text-gray-600">
+          <div className="border-t border-white/20 pt-3 mb-4">
+            <p className="text-sm text-white/70">
               <span className="font-medium">Follow-up:</span>{" "}
-              {formatDate(prescription.followUpDate)}
+              <span className="text-white">
+                {formatDate(prescription.followUpDate)}
+              </span>
             </p>
           </div>
         )}
@@ -643,14 +681,14 @@ const DoctorPrescriptions = () => {
         <div className="flex justify-end space-x-3">
           <button
             onClick={() => setSelectedPrescription(prescription)}
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            className="text-blue-300 hover:text-blue-200 text-sm font-medium transition-colors"
           >
             View Details
           </button>
-          <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+          <button className="text-purple-300 hover:text-purple-200 text-sm font-medium transition-colors">
             Duplicate
           </button>
-          <button className="text-gray-600 hover:text-gray-700 text-sm font-medium">
+          <button className="text-white/70 hover:text-white text-sm font-medium transition-colors">
             Edit
           </button>
         </div>
@@ -662,13 +700,13 @@ const DoctorPrescriptions = () => {
     if (!prescription) return null;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="bg-green-600 text-white p-6 rounded-t-lg">
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-t-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold">Prescription Details</h2>
-                <p className="text-green-100">
+                <p className="text-blue-100">
                   Prescribed on{" "}
                   {formatDate(
                     prescription.createdAt || prescription.issuedDate
@@ -677,7 +715,7 @@ const DoctorPrescriptions = () => {
               </div>
               <button
                 onClick={onClose}
-                className="text-white hover:text-gray-200 p-1"
+                className="text-white hover:text-gray-200 p-1 hover:bg-white/10 rounded-lg transition-colors"
               >
                 <svg
                   className="w-6 h-6"
@@ -697,52 +735,63 @@ const DoctorPrescriptions = () => {
           </div>
 
           <div className="p-6">
-            <div className="mb-6 pb-4 border-b">
-              <h4 className="font-semibold text-gray-900 mb-2">
+            <div className="mb-6 pb-4 border-b border-white/20">
+              <h4 className="font-semibold text-white mb-2">
                 Patient Information
               </h4>
-              <p className="text-gray-700">
+              <p className="text-white/80">
                 {prescription.patient?.name || "Unknown Patient"}
               </p>
             </div>
 
-            <div className="mb-6 pb-4 border-b">
-              <h4 className="font-semibold text-gray-900 mb-2">Diagnosis</h4>
-              <p className="text-gray-700">{prescription.diagnosis}</p>
+            <div className="mb-6 pb-4 border-b border-white/20">
+              <h4 className="font-semibold text-white mb-2">Diagnosis</h4>
+              <p className="text-white/80">{prescription.diagnosis}</p>
             </div>
 
-            <div className="mb-6 pb-4 border-b">
-              <h4 className="font-semibold text-gray-900 mb-4">
+            <div className="mb-6 pb-4 border-b border-white/20">
+              <h4 className="font-semibold text-white mb-4">
                 Prescribed Medications
               </h4>
               <div className="space-y-4">
                 {prescription.medications.map((med, index) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-4">
+                  <div
+                    key={index}
+                    className="bg-white/5 border border-white/10 rounded-xl p-4"
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <p className="font-semibold text-gray-900 text-lg">
+                        <p className="font-semibold text-white text-lg">
                           {med.name}
                         </p>
-                        <p className="text-gray-600">
+                        <p className="text-white/70">
                           Dosage:{" "}
-                          <span className="font-medium">{med.dosage}</span>
+                          <span className="font-medium text-white">
+                            {med.dosage}
+                          </span>
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-600">
+                        <p className="text-white/70">
                           Frequency:{" "}
-                          <span className="font-medium">{med.frequency}</span>
+                          <span className="font-medium text-white">
+                            {med.frequency}
+                          </span>
                         </p>
-                        <p className="text-gray-600">
+                        <p className="text-white/70">
                           Duration:{" "}
-                          <span className="font-medium">{med.duration}</span>
+                          <span className="font-medium text-white">
+                            {med.duration}
+                          </span>
                         </p>
                       </div>
                     </div>
                     {med.instructions && (
-                      <div className="mt-3 pt-3 border-t border-gray-200">
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium">Instructions:</span>{" "}
+                      <div className="mt-3 pt-3 border-t border-white/20">
+                        <p className="text-sm text-white/70">
+                          <span className="font-medium text-white">
+                            Instructions:
+                          </span>{" "}
                           {med.instructions}
                         </p>
                       </div>
@@ -753,28 +802,28 @@ const DoctorPrescriptions = () => {
             </div>
 
             {prescription.notes && (
-              <div className="mb-6 pb-4 border-b">
-                <h4 className="font-semibold text-gray-900 mb-2">Notes</h4>
-                <p className="text-gray-700">{prescription.notes}</p>
+              <div className="mb-6 pb-4 border-b border-white/20">
+                <h4 className="font-semibold text-white mb-2">Notes</h4>
+                <p className="text-white/80">{prescription.notes}</p>
               </div>
             )}
 
             {prescription.followUpDate && (
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-900 mb-2">
+                <h4 className="font-semibold text-white mb-2">
                   Follow-up Appointment
                 </h4>
-                <p className="text-gray-700">
+                <p className="text-white/80">
                   Scheduled for {formatDate(prescription.followUpDate)}
                 </p>
               </div>
             )}
 
             <div className="flex space-x-4">
-              <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+              <button className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 px-4 rounded-xl transition-all duration-300 font-medium">
                 Download PDF
               </button>
-              <button className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
+              <button className="flex-1 bg-white/10 border border-white/20 hover:bg-white/20 text-white py-2 px-4 rounded-xl transition-all duration-300 font-medium">
                 Print
               </button>
             </div>
@@ -789,7 +838,7 @@ const DoctorPrescriptions = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl">
               <svg
                 className="w-6 h-6 text-white"
                 fill="none"
@@ -800,7 +849,7 @@ const DoctorPrescriptions = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 8.172V5L8 4z"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
               </svg>
             </div>
@@ -815,7 +864,7 @@ const DoctorPrescriptions = () => {
           </div>
           <button
             onClick={() => setShowCreateForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 flex items-center"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center shadow-lg font-medium"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -839,7 +888,7 @@ const DoctorPrescriptions = () => {
           <div className="text-center py-12">
             <div className="flex items-center justify-center">
               <svg
-                className="animate-spin h-8 w-8 text-blue-600 mr-3"
+                className="animate-spin h-8 w-8 text-white/60 mr-3"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -858,19 +907,19 @@ const DoctorPrescriptions = () => {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              <span className="text-gray-600">Loading prescriptions...</span>
+              <span className="text-white/80">Loading prescriptions...</span>
             </div>
           </div>
         ) : error ? (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">⚠️</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <div className="text-red-400 text-6xl mb-4">⚠️</div>
+            <h3 className="text-lg font-medium text-white mb-2">
               Error loading prescriptions
             </h3>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <p className="text-white/70 mb-6">{error}</p>
             <button
               onClick={() => fetchPrescriptions()}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-xl transition-all duration-300 font-medium"
             >
               Try Again
             </button>
@@ -886,16 +935,16 @@ const DoctorPrescriptions = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">📝</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <div className="text-white/60 text-6xl mb-4">📝</div>
+            <h3 className="text-lg font-medium text-white mb-2">
               No prescriptions created yet
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-white/70 mb-6">
               Start by creating your first prescription
             </p>
             <button
               onClick={() => setShowCreateForm(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-xl transition-all duration-300 font-medium"
             >
               Create Prescription
             </button>

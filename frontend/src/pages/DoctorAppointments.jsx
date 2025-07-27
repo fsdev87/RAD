@@ -74,17 +74,17 @@ const DoctorAppointments = ({ setCurrentView }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmed":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/20 text-green-300 border border-green-500/30";
       case "scheduled":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30";
       case "completed":
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-500/20 text-gray-300 border border-gray-500/30";
       case "cancelled":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/20 text-red-300 border border-red-500/30";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-500/20 text-gray-300 border border-gray-500/30";
     }
   };
 
@@ -141,20 +141,20 @@ const DoctorAppointments = ({ setCurrentView }) => {
     };
 
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl hover:bg-white/15 transition-all duration-300">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-              <span className="text-blue-600 font-semibold text-lg">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-4">
+              <span className="text-white font-semibold text-lg">
                 {patient.name?.charAt(0) || "P"}
               </span>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-white">
                 {patient.name}
               </h3>
-              <p className="text-gray-600">{patient.email}</p>
-              <p className="text-gray-600 text-sm">{patient.phone}</p>
+              <p className="text-white/70">{patient.email}</p>
+              <p className="text-white/70 text-sm">{patient.phone}</p>
             </div>
           </div>
           <span
@@ -170,7 +170,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="flex items-center">
             <svg
-              className="w-5 h-5 text-gray-400 mr-2"
+              className="w-5 h-5 text-white/60 mr-2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -182,13 +182,13 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span className="text-gray-700">
+            <span className="text-white/80">
               {formatDate(appointment.date)}
             </span>
           </div>
           <div className="flex items-center">
             <svg
-              className="w-5 h-5 text-gray-400 mr-2"
+              className="w-5 h-5 text-white/60 mr-2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -200,30 +200,30 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span className="text-gray-700">
+            <span className="text-white/80">
               {formatTime(appointment.time)}
             </span>
           </div>
         </div>
 
-        <div className="border-t pt-4 mb-4">
+        <div className="border-t border-white/20 pt-4 mb-4">
           <div className="mb-2">
-            <span className="text-sm font-medium text-gray-600">Reason: </span>
-            <span className="text-gray-900">{appointment.reason}</span>
+            <span className="text-sm font-medium text-white/70">Reason: </span>
+            <span className="text-white">{appointment.reason}</span>
           </div>
           {appointment.symptoms && appointment.symptoms.length > 0 && (
             <div className="mb-2">
-              <span className="text-sm font-medium text-gray-600">
+              <span className="text-sm font-medium text-white/70">
                 Symptoms:{" "}
               </span>
-              <span className="text-gray-900">
+              <span className="text-white">
                 {appointment.symptoms.join(", ")}
               </span>
             </div>
           )}
           <div>
-            <span className="text-sm font-medium text-gray-600">Type: </span>
-            <span className="text-gray-900 capitalize">{appointment.type}</span>
+            <span className="text-sm font-medium text-white/70">Type: </span>
+            <span className="text-white capitalize">{appointment.type}</span>
           </div>
         </div>
 
@@ -231,17 +231,17 @@ const DoctorAppointments = ({ setCurrentView }) => {
           <div className="flex space-x-3">
             <button
               onClick={() => setSelectedAppointment(appointment)}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200"
+              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-2 px-4 rounded-xl transition-all duration-300 font-medium"
             >
               Start Consultation
             </button>
             <button
               onClick={() => setCurrentView && setCurrentView("prescriptions")}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-200"
+              className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-300 font-medium"
             >
               Create Prescription
             </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200">
+            <button className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-all duration-300 text-white font-medium">
               Reschedule
             </button>
           </div>
@@ -251,13 +251,13 @@ const DoctorAppointments = ({ setCurrentView }) => {
           <div className="flex space-x-3">
             <button
               onClick={() => handleStatusUpdate(appointment._id, "confirmed")}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-200"
+              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 px-4 rounded-xl transition-all duration-300 font-medium"
             >
               Confirm Appointment
             </button>
             <button
               onClick={() => handleStatusUpdate(appointment._id, "cancelled")}
-              className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition duration-200"
+              className="px-4 py-2 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl hover:bg-red-500/30 transition-all duration-300 font-medium"
             >
               Cancel
             </button>
@@ -268,13 +268,13 @@ const DoctorAppointments = ({ setCurrentView }) => {
           <div className="flex space-x-3">
             <button
               onClick={() => handleStatusUpdate(appointment._id, "confirmed")}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-200"
+              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 px-4 rounded-xl transition-all duration-300 font-medium"
             >
               Confirm
             </button>
             <button
               onClick={() => handleStatusUpdate(appointment._id, "cancelled")}
-              className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition duration-200"
+              className="px-4 py-2 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl hover:bg-red-500/30 transition-all duration-300 font-medium"
             >
               Decline
             </button>
@@ -285,8 +285,8 @@ const DoctorAppointments = ({ setCurrentView }) => {
         {showActions &&
           appointment.status === "confirmed" &&
           new Date(appointment.date).toISOString().split("T")[0] < today && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-3">
-              <p className="text-orange-800 text-sm mb-2">
+            <div className="bg-orange-500/20 border border-orange-500/40 rounded-xl p-3 mt-3">
+              <p className="text-orange-200 text-sm mb-2">
                 ⚠️ This appointment is past due. Please update its status:
               </p>
               <div className="flex space-x-2">
@@ -294,7 +294,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
                   onClick={() =>
                     handleStatusUpdate(appointment._id, "completed")
                   }
-                  className="bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded text-sm transition duration-200"
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-1 px-3 rounded-lg text-sm transition-all duration-300 font-medium"
                 >
                   Mark Completed
                 </button>
@@ -302,7 +302,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
                   onClick={() =>
                     handleStatusUpdate(appointment._id, "cancelled")
                   }
-                  className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm transition duration-200"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-1 px-3 rounded-lg text-sm transition-all duration-300 font-medium"
                 >
                   Mark No-Show
                 </button>
@@ -319,9 +319,9 @@ const DoctorAppointments = ({ setCurrentView }) => {
     const patient = appointment.patient || { name: "Unknown Patient" };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="bg-blue-600 text-white p-6 rounded-t-lg">
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-t-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold">Patient Consultation</h2>
@@ -332,7 +332,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
               </div>
               <button
                 onClick={onClose}
-                className="text-white hover:text-gray-200 p-1"
+                className="text-white hover:text-gray-200 p-1 hover:bg-white/10 rounded-lg transition-colors"
               >
                 <svg
                   className="w-6 h-6"
@@ -355,38 +355,38 @@ const DoctorAppointments = ({ setCurrentView }) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Patient Info */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <h3 className="text-lg font-semibold text-white mb-4">
                   Patient Information
                 </h3>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
                   <div>
-                    <span className="font-medium text-gray-600">Name:</span>
-                    <span className="ml-2 text-gray-900">{patient.name}</span>
+                    <span className="font-medium text-white/70">Name:</span>
+                    <span className="ml-2 text-white">{patient.name}</span>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-600">Email:</span>
-                    <span className="ml-2 text-gray-900">
+                    <span className="font-medium text-white/70">Email:</span>
+                    <span className="ml-2 text-white">
                       {patient.email || "N/A"}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-600">Phone:</span>
-                    <span className="ml-2 text-gray-900">
+                    <span className="font-medium text-white/70">Phone:</span>
+                    <span className="ml-2 text-white">
                       {patient.phone || "N/A"}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-600">Reason:</span>
-                    <span className="ml-2 text-gray-900">
+                    <span className="font-medium text-white/70">Reason:</span>
+                    <span className="ml-2 text-white">
                       {appointment.reason}
                     </span>
                   </div>
                   {appointment.symptoms && appointment.symptoms.length > 0 && (
                     <div>
-                      <span className="font-medium text-gray-600">
+                      <span className="font-medium text-white/70">
                         Symptoms:
                       </span>
-                      <p className="mt-1 text-gray-900">
+                      <p className="mt-1 text-white">
                         {appointment.symptoms.join(", ")}
                       </p>
                     </div>
@@ -396,7 +396,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
 
               {/* Quick Actions */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <h3 className="text-lg font-semibold text-white mb-4">
                   Quick Actions
                 </h3>
                 <div className="space-y-3">
@@ -405,17 +405,17 @@ const DoctorAppointments = ({ setCurrentView }) => {
                       setSelectedAppointment(null);
                       setCurrentView("doctor-prescriptions");
                     }}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition duration-200"
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-medium"
                   >
                     📝 Create Prescription
                   </button>
-                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition duration-200">
+                  <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-medium">
                     📋 Add Medical Notes
                   </button>
-                  <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg transition duration-200">
+                  <button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-medium">
                     📅 Schedule Follow-up
                   </button>
-                  <button className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 px-4 rounded-lg transition duration-200">
+                  <button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-medium">
                     🔬 Order Tests
                   </button>
                 </div>
@@ -425,7 +425,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
             <div className="mt-8 flex justify-end space-x-4">
               <button
                 onClick={onClose}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-200"
+                className="px-6 py-2 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-all duration-300 text-white font-medium"
               >
                 Close
               </button>
@@ -434,7 +434,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
                   onClose();
                   setCurrentView && setCurrentView("doctor-prescriptions");
                 }}
-                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-200"
+                className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-300 font-medium"
               >
                 Create Prescription
               </button>
@@ -466,7 +466,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
               </svg>
             </div>
             <div>
-              <h1 className="heading-gradient text-4xl font-bold">
+              <h1 className="heading-gradient text-4xl font-bold mb-2">
                 My Appointments
               </h1>
               <p className="text-gray-300 text-lg">
@@ -478,7 +478,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-          <div className="card-modern p-6 bg-gradient-to-br from-blue-50 to-indigo-100 border-l-4 border-blue-500">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
                 <svg
@@ -496,14 +496,14 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-white">
                   {todayAppointments.length}
                 </p>
-                <p className="text-gray-600 font-medium">Today</p>
+                <p className="text-gray-300 font-medium">Today</p>
               </div>
             </div>
           </div>
-          <div className="card-modern p-6 bg-gradient-to-br from-purple-50 to-purple-100 border-l-4 border-purple-500">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
                 <svg
@@ -521,14 +521,14 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-2xl font-bold text-white">
                   {upcomingAppointments.length}
                 </p>
-                <p className="text-gray-600 font-medium">Upcoming</p>
+                <p className="text-gray-300 font-medium">Upcoming</p>
               </div>
             </div>
           </div>
-          <div className="card-modern p-6 bg-gradient-to-br from-orange-50 to-orange-100 border-l-4 border-orange-500">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
                 <svg
@@ -546,14 +546,14 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-2xl font-bold text-white">
                   {missedAppointments.length}
                 </p>
-                <p className="text-gray-600 font-medium">Missed</p>
+                <p className="text-gray-300 font-medium">Missed</p>
               </div>
             </div>
           </div>
-          <div className="card-modern p-6 bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
                 <svg
@@ -571,14 +571,14 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-white">
                   {pastAppointments.length}
                 </p>
-                <p className="text-gray-600 font-medium">Completed</p>
+                <p className="text-gray-300 font-medium">Completed</p>
               </div>
             </div>
           </div>
-          <div className="card-modern p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 border-l-4 border-indigo-500">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
                 <svg
@@ -596,10 +596,10 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-indigo-600">
+                <p className="text-2xl font-bold text-white">
                   {allAppointments.length}
                 </p>
-                <p className="text-gray-600 font-medium">Total</p>
+                <p className="text-gray-300 font-medium">Total</p>
               </div>
             </div>
           </div>
@@ -607,44 +607,44 @@ const DoctorAppointments = ({ setCurrentView }) => {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-2 shadow-xl">
+            <nav className="flex space-x-2">
               <button
                 onClick={() => setSelectedTab("today")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`py-3 px-6 rounded-xl font-medium text-sm transition-all duration-300 ${
                   selectedTab === "today"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "bg-white text-gray-900 shadow-lg"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
                 Today ({todayAppointments.length})
               </button>
               <button
                 onClick={() => setSelectedTab("upcoming")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`py-3 px-6 rounded-xl font-medium text-sm transition-all duration-300 ${
                   selectedTab === "upcoming"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "bg-white text-gray-900 shadow-lg"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
                 Upcoming ({upcomingAppointments.length})
               </button>
               <button
                 onClick={() => setSelectedTab("missed")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`py-3 px-6 rounded-xl font-medium text-sm transition-all duration-300 ${
                   selectedTab === "missed"
-                    ? "border-orange-500 text-orange-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "bg-white text-gray-900 shadow-lg"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
                 Missed ({missedAppointments.length})
               </button>
               <button
                 onClick={() => setSelectedTab("past")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`py-3 px-6 rounded-xl font-medium text-sm transition-all duration-300 ${
                   selectedTab === "past"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "bg-white text-gray-900 shadow-lg"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
                 Past ({pastAppointments.length})
@@ -659,18 +659,18 @@ const DoctorAppointments = ({ setCurrentView }) => {
             <>
               {loading ? (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">⏳</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="text-white/60 text-6xl mb-4">⏳</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
                     Loading appointments...
                   </h3>
                 </div>
               ) : error ? (
                 <div className="text-center py-12">
                   <div className="text-red-400 text-6xl mb-4">⚠️</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <h3 className="text-lg font-medium text-white mb-2">
                     Error loading appointments
                   </h3>
-                  <p className="text-gray-600">{error}</p>
+                  <p className="text-white/70">{error}</p>
                 </div>
               ) : todayAppointments.length > 0 ? (
                 todayAppointments.map((appointment) => (
@@ -681,11 +681,11 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">📅</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="text-white/60 text-6xl mb-4">📅</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
                     No appointments today
                   </h3>
-                  <p className="text-gray-600">You have a free day!</p>
+                  <p className="text-white/70">You have a free day!</p>
                 </div>
               )}
             </>
@@ -695,18 +695,18 @@ const DoctorAppointments = ({ setCurrentView }) => {
             <>
               {loading ? (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">⏳</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="text-white/60 text-6xl mb-4">⏳</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
                     Loading appointments...
                   </h3>
                 </div>
               ) : error ? (
                 <div className="text-center py-12">
                   <div className="text-red-400 text-6xl mb-4">⚠️</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <h3 className="text-lg font-medium text-white mb-2">
                     Error loading appointments
                   </h3>
-                  <p className="text-gray-600">{error}</p>
+                  <p className="text-white/70">{error}</p>
                 </div>
               ) : upcomingAppointments.length > 0 ? (
                 upcomingAppointments.map((appointment) => (
@@ -717,11 +717,11 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">⏳</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="text-white/60 text-6xl mb-4">⏳</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
                     No upcoming appointments
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-white/70">
                     Your schedule is clear for the upcoming days
                   </p>
                 </div>
@@ -733,24 +733,24 @@ const DoctorAppointments = ({ setCurrentView }) => {
             <>
               {loading ? (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">⏳</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="text-white/60 text-6xl mb-4">⏳</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
                     Loading appointments...
                   </h3>
                 </div>
               ) : error ? (
                 <div className="text-center py-12">
                   <div className="text-red-400 text-6xl mb-4">⚠️</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <h3 className="text-lg font-medium text-white mb-2">
                     Error loading appointments
                   </h3>
-                  <p className="text-gray-600">{error}</p>
+                  <p className="text-white/70">{error}</p>
                 </div>
               ) : missedAppointments.length > 0 ? (
                 <>
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+                  <div className="bg-orange-500/20 border border-orange-500/40 rounded-xl p-4 mb-6">
                     <div className="flex items-center">
-                      <div className="text-orange-600 mr-3">
+                      <div className="text-orange-300 mr-3">
                         <svg
                           className="w-5 h-5"
                           fill="currentColor"
@@ -764,10 +764,10 @@ const DoctorAppointments = ({ setCurrentView }) => {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-orange-800 font-medium">
+                        <h3 className="text-orange-200 font-medium">
                           Missed Appointments
                         </h3>
-                        <p className="text-orange-700 text-sm">
+                        <p className="text-orange-300 text-sm">
                           These appointments are past their scheduled date and
                           need status updates.
                         </p>
@@ -783,11 +783,11 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 </>
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">✅</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="text-white/60 text-6xl mb-4">✅</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
                     No missed appointments
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-white/70">
                     All appointments are properly tracked!
                   </p>
                 </div>
@@ -799,18 +799,18 @@ const DoctorAppointments = ({ setCurrentView }) => {
             <>
               {loading ? (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">⏳</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="text-white/60 text-6xl mb-4">⏳</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
                     Loading appointments...
                   </h3>
                 </div>
               ) : error ? (
                 <div className="text-center py-12">
                   <div className="text-red-400 text-6xl mb-4">⚠️</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <h3 className="text-lg font-medium text-white mb-2">
                     Error loading appointments
                   </h3>
-                  <p className="text-gray-600">{error}</p>
+                  <p className="text-white/70">{error}</p>
                 </div>
               ) : pastAppointments.length > 0 ? (
                 pastAppointments.map((appointment) => (
@@ -822,11 +822,11 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">📋</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="text-white/60 text-6xl mb-4">📋</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
                     No past appointments
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-white/70">
                     Completed appointments will appear here
                   </p>
                 </div>
