@@ -741,13 +741,10 @@ const comprehensiveSeed = async () => {
         physicalExamination:
           "BP: 135/85, HR: 72, Temp: 98.6°F. Heart: Regular rate and rhythm, no murmurs. Lungs: Clear bilaterally.",
         vitalSigns: {
-          bloodPressure: { systolic: 135, diastolic: 85 },
-          heartRate: 72,
-          temperature: 37.0,
-          respiratoryRate: 16,
-          oxygenSaturation: 98,
-          weight: 85,
-          height: 182,
+          bloodPressure: "135/85",
+          heartRate: "72",
+          temperature: "37.0°C",
+          weight: "85 kg",
         },
         diagnosis:
           "Hypertension (well-controlled), Type 2 Diabetes (fair control)",
@@ -784,13 +781,10 @@ const comprehensiveSeed = async () => {
         physicalExamination:
           "Neurological exam: Cranial nerves II-XII intact. No focal neurological deficits. Reflexes symmetric and normal.",
         vitalSigns: {
-          bloodPressure: { systolic: 120, diastolic: 80 },
-          heartRate: 68,
-          temperature: 36.8,
-          respiratoryRate: 14,
-          oxygenSaturation: 99,
-          weight: 75,
-          height: 178,
+          bloodPressure: "120/80",
+          heartRate: "68",
+          temperature: "36.8°C",
+          weight: "75 kg",
         },
         diagnosis: "Tension-type headaches (improving)",
         treatment:
@@ -811,13 +805,10 @@ const comprehensiveSeed = async () => {
         physicalExamination:
           "Well-appearing young adult. Heart: RRR, no murmurs. Lungs: CTAB. Abdomen: soft, non-tender. Skin: no concerning lesions.",
         vitalSigns: {
-          bloodPressure: { systolic: 110, diastolic: 70 },
-          heartRate: 65,
-          temperature: 36.5,
-          respiratoryRate: 14,
-          oxygenSaturation: 99,
-          weight: 60,
-          height: 165,
+          bloodPressure: "110/70",
+          heartRate: "65",
+          temperature: "36.5°C",
+          weight: "60 kg",
         },
         diagnosis: "Healthy young adult",
         treatment:
