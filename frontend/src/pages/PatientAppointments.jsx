@@ -267,14 +267,31 @@ const PatientAppointments = () => {
                     ))
                   ) : (
                     <div className="text-center py-12">
-                      <div className="text-gray-400 text-6xl mb-4">📅</div>
+                      <div className="w-20 h-20 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg
+                          className="w-10 h-10 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
                       <h3 className="text-lg font-medium text-white mb-2">
                         No upcoming appointments
                       </h3>
                       <p className="text-gray-300 mb-6">
                         Book an appointment with one of our doctors
                       </p>
-                      <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg shadow-lg">
+                      <button
+                        onClick={() => setCurrentView("doctors")}
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg shadow-lg transition-all duration-300"
+                      >
                         Find Doctors
                       </button>
                     </div>
@@ -293,7 +310,21 @@ const PatientAppointments = () => {
                     ))
                   ) : (
                     <div className="text-center py-12">
-                      <div className="text-gray-400 text-6xl mb-4">📋</div>
+                      <div className="w-20 h-20 bg-gradient-to-r from-gray-400/20 to-gray-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg
+                          className="w-10 h-10 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
                       <h3 className="text-lg font-medium text-white mb-2">
                         No past appointments
                       </h3>
@@ -312,21 +343,75 @@ const PatientAppointments = () => {
                 Quick Actions
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg p-4 text-center transition duration-200 backdrop-blur-sm">
-                  <div className="text-2xl mb-2">🩺</div>
-                  <p className="font-medium text-gray-200">
-                    Book New Appointment
+                <button
+                  onClick={() => setCurrentView("doctors")}
+                  className="group bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 rounded-xl p-6 text-center transition-all duration-300 backdrop-blur-sm hover:shadow-xl"
+                >
+                  <div className="w-12 h-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-white/20 transition-all duration-300">
+                    <svg
+                      className="w-6 h-6 text-gray-300 group-hover:text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                  </div>
+                  <p className="font-medium text-white group-hover:text-white transition-colors">
+                    Find Doctors
+                  </p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Browse available doctors
                   </p>
                 </button>
-                <button className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg p-4 text-center transition duration-200 backdrop-blur-sm">
-                  <div className="text-2xl mb-2">💊</div>
-                  <p className="font-medium text-gray-200">
-                    View Prescriptions
+                <button
+                  onClick={() => setCurrentView("prescriptions")}
+                  className="group bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 rounded-xl p-6 text-center transition-all duration-300 backdrop-blur-sm hover:shadow-xl"
+                >
+                  <div className="w-12 h-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-white/20 transition-all duration-300">
+                    <svg
+                      className="w-6 h-6 text-gray-300 group-hover:text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                    </svg>
+                  </div>
+                  <p className="font-medium text-white group-hover:text-white transition-colors">
+                    Prescriptions
                   </p>
+                  <p className="text-sm text-gray-400 mt-1">View medications</p>
                 </button>
-                <button className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg p-4 text-center transition duration-200 backdrop-blur-sm">
-                  <div className="text-2xl mb-2">📋</div>
-                  <p className="font-medium text-gray-200">Medical Records</p>
+                <button
+                  onClick={() => setCurrentView("medical-records")}
+                  className="group bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 rounded-xl p-6 text-center transition-all duration-300 backdrop-blur-sm hover:shadow-xl"
+                >
+                  <div className="w-12 h-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-white/20 transition-all duration-300">
+                    <svg
+                      className="w-6 h-6 text-gray-300 group-hover:text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  <p className="font-medium text-white group-hover:text-white transition-colors">
+                    Medical Records
+                  </p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    View health history
+                  </p>
                 </button>
               </div>
             </div>
