@@ -415,13 +415,13 @@ const DoctorPrescriptions = () => {
   useEffect(() => {
     console.log("🔄 DoctorAppointments state updated:", {
       count: doctorAppointments.length,
-      appointments: doctorAppointments.map(apt => ({
+      appointments: doctorAppointments.map((apt) => ({
         id: apt._id,
-        patient: apt.patient?.name || 'No patient name',
+        patient: apt.patient?.name || "No patient name",
         date: apt.date,
         time: apt.time,
-        status: apt.status
-      }))
+        status: apt.status,
+      })),
     });
   }, [doctorAppointments]);
 
@@ -453,15 +453,15 @@ const DoctorPrescriptions = () => {
   const fetchDoctorAppointments = async () => {
     try {
       console.log("🔍 Fetching confirmed appointments for prescriptions...");
-      
+
       // Fetch confirmed appointments directly from API with higher limit
       const result = await appointmentsAPI.getDoctorAppointments({
         status: "confirmed",
         limit: 100, // Get up to 100 confirmed appointments
       });
-      
+
       console.log("📋 API Response:", result);
-      
+
       if (result.success) {
         const confirmedAppointments = result.appointments || [];
 
@@ -472,7 +472,9 @@ const DoctorPrescriptions = () => {
         setDoctorAppointments(confirmedAppointments);
 
         if (confirmedAppointments.length === 0) {
-          console.log("⚠️ No confirmed appointments available for prescriptions");
+          console.log(
+            "⚠️ No confirmed appointments available for prescriptions"
+          );
         }
       } else {
         console.error("❌ Failed to fetch appointments:", result.message);

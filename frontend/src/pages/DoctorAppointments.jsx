@@ -33,7 +33,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
     const fetchStatistics = async () => {
       try {
         const today = new Date().toISOString().split("T")[0];
-        
+
         // Fetch today's appointments
         const todayResult = await appointmentsAPI.getDoctorAppointments({
           date: today,
@@ -61,9 +61,15 @@ const DoctorAppointments = ({ setCurrentView }) => {
 
         setStatistics({
           today: todayResult.success ? todayResult.pagination?.total || 0 : 0,
-          upcoming: upcomingResult.success ? upcomingResult.pagination?.total || 0 : 0,
-          missed: missedResult.success ? missedResult.pagination?.total || 0 : 0,
-          completed: completedResult.success ? completedResult.pagination?.total || 0 : 0,
+          upcoming: upcomingResult.success
+            ? upcomingResult.pagination?.total || 0
+            : 0,
+          missed: missedResult.success
+            ? missedResult.pagination?.total || 0
+            : 0,
+          completed: completedResult.success
+            ? completedResult.pagination?.total || 0
+            : 0,
         });
       } catch (error) {
         console.error("Error fetching statistics:", error);
@@ -611,7 +617,9 @@ const DoctorAppointments = ({ setCurrentView }) => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">
-                  {selectedTab === "today" ? pagination.total : statistics.today}
+                  {selectedTab === "today"
+                    ? pagination.total
+                    : statistics.today}
                 </p>
                 <p className="text-gray-300 font-medium">Today</p>
               </div>
@@ -731,7 +739,8 @@ const DoctorAppointments = ({ setCurrentView }) => {
                     : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Today ({selectedTab === "today" ? pagination.total : statistics.today})
+                Today (
+                {selectedTab === "today" ? pagination.total : statistics.today})
               </button>
               <button
                 onClick={() => setSelectedTab("upcoming")}
@@ -742,7 +751,10 @@ const DoctorAppointments = ({ setCurrentView }) => {
                 }`}
               >
                 Upcoming (
-                {selectedTab === "upcoming" ? pagination.total : statistics.upcoming})
+                {selectedTab === "upcoming"
+                  ? pagination.total
+                  : statistics.upcoming}
+                )
               </button>
               <button
                 onClick={() => setSelectedTab("missed")}
@@ -752,7 +764,11 @@ const DoctorAppointments = ({ setCurrentView }) => {
                     : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Missed ({selectedTab === "missed" ? pagination.total : statistics.missed})
+                Missed (
+                {selectedTab === "missed"
+                  ? pagination.total
+                  : statistics.missed}
+                )
               </button>
               <button
                 onClick={() => setSelectedTab("past")}
@@ -762,7 +778,11 @@ const DoctorAppointments = ({ setCurrentView }) => {
                     : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Past ({selectedTab === "past" ? pagination.total : statistics.completed})
+                Past (
+                {selectedTab === "past"
+                  ? pagination.total
+                  : statistics.completed}
+                )
               </button>
             </nav>
           </div>

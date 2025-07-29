@@ -13,12 +13,52 @@ const PatientAppointments = ({ setCurrentView }) => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  // Statistics state for tab counts
+  const [statistics, setStatistics] = useState({
+    upcoming: 0,
+    past: 0,
+  });
 
   // Reset pagination when tab changes
   useEffect(() => {
     setCurrentPage(1);
     setPagination({ current: 1, pages: 1, total: 0 });
   }, [selectedTab]);
+
+  // Fetch statistics for tab counts
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        console.log("🔍 Fetching patient appointment statistics...");
+
+        // Fetch upcoming appointments count
+        const upcomingResult = await appointmentsAPI.getPatientAppointments({
+          status: "confirmed,pending,scheduled",
+          limit: 1, // Just get count
+        });
+
+        // Fetch past appointments count
+        const pastResult = await appointmentsAPI.getPatientAppointments({
+          status: "completed",
+          limit: 1, // Just get count
+        });
+
+        const newStats = {
+          upcoming: upcomingResult.success
+            ? upcomingResult.pagination?.total || 0
+            : 0,
+          past: pastResult.success ? pastResult.pagination?.total || 0 : 0,
+        };
+
+        console.log("📊 Patient appointment statistics:", newStats);
+        setStatistics(newStats);
+      } catch (error) {
+        console.error("Error fetching statistics:", error);
+      }
+    };
+
+    fetchStatistics();
+  }, []);
 
   // Fetch appointments from API based on selected tab
   useEffect(() => {
@@ -61,9 +101,6 @@ const PatientAppointments = ({ setCurrentView }) => {
 
     fetchAppointments();
   }, [currentPage, selectedTab]);
-
-  // Display appointments based on current tab (already filtered by backend)
-  const displayAppointments = appointments;
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -259,7 +296,10 @@ const PatientAppointments = ({ setCurrentView }) => {
                     }`}
                   >
                     Upcoming (
-                    {selectedTab === "upcoming" ? pagination.total : "..."})
+                    {selectedTab === "upcoming"
+                      ? pagination.total
+                      : statistics.upcoming}
+                    )
                   </button>
                   <button
                     onClick={() => setSelectedTab("past")}
@@ -270,7 +310,10 @@ const PatientAppointments = ({ setCurrentView }) => {
                     }`}
                   >
                     Past Appointments (
-                    {selectedTab === "past" ? pagination.total : "..."})
+                    {selectedTab === "past"
+                      ? pagination.total
+                      : statistics.past}
+                    )
                   </button>
                 </nav>
               </div>
