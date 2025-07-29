@@ -5,8 +5,11 @@ import DoctorList from "./pages/DoctorList";
 import BookAppointment from "./pages/BookAppointment";
 import PatientAppointments from "./pages/PatientAppointments";
 import PatientPrescriptions from "./pages/PatientPrescriptions";
+import PatientMedicalRecords from "./pages/PatientMedicalRecords";
 import DoctorAppointments from "./pages/DoctorAppointments";
 import DoctorPrescriptions from "./pages/DoctorPrescriptions";
+import DoctorMedicalRecords from "./pages/DoctorMedicalRecords";
+import DoctorScheduleManager from "./pages/DoctorScheduleManager";
 import { authAPI, apiUtils } from "./services/api";
 
 const App = () => {
@@ -66,31 +69,50 @@ const App = () => {
   // Show loading spinner while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🏥</div>
-          <div className="flex items-center justify-center">
-            <svg
-              className="animate-spin -ml-1 mr-3 h-8 w-8 text-blue-600"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center animate-fade-in-up">
+          <div className="relative">
+            <div className="w-20 h-20 bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl relative">
+              <svg
+                className="w-10 h-10 text-white"
+                fill="none"
                 stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <span className="text-gray-600">Loading...</span>
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
+              </svg>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></div>
+            </div>
+            <div className="flex items-center justify-center">
+              <svg
+                className="animate-spin -ml-1 mr-3 h-8 w-8 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span className="text-white text-lg font-medium">
+                Loading Medical Platform...
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -132,6 +154,8 @@ const App = () => {
           return <PatientAppointments setCurrentView={setCurrentView} />;
         case "prescriptions":
           return <PatientPrescriptions />;
+        case "medical-records":
+          return <PatientMedicalRecords />;
         default:
           return (
             <DoctorList
@@ -149,6 +173,10 @@ const App = () => {
           return <DoctorAppointments setCurrentView={setCurrentView} />;
         case "doctor-prescriptions":
           return <DoctorPrescriptions />;
+        case "doctor-medical-records":
+          return <DoctorMedicalRecords />;
+        case "doctor-schedule":
+          return <DoctorScheduleManager />;
         default:
           return <DoctorAppointments />;
       }
@@ -168,7 +196,7 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-purple-900">
       <Navigation
         currentView={currentView}
         setCurrentView={setCurrentView}
@@ -176,7 +204,7 @@ const App = () => {
         currentUser={currentUser}
         onLogout={handleLogout}
       />
-      <main>{renderCurrentView()}</main>
+      <main className="animate-fade-in-up">{renderCurrentView()}</main>
     </div>
   );
 };

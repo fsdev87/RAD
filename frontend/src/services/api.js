@@ -486,4 +486,275 @@ export const apiUtils = {
   },
 };
 
+// Medical Records API calls
+export const medicalRecordsAPI = {
+  // Get patient medical records
+  getPatientRecords: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.doctorId) params.append("doctorId", filters.doctorId);
+      if (filters.condition) params.append("condition", filters.condition);
+      if (filters.page) params.append("page", filters.page);
+      if (filters.limit) params.append("limit", filters.limit);
+
+      const response = await api.get(`/medical-records/patient?${params}`);
+      if (response.data.success) {
+        return {
+          success: true,
+          records: response.data.data.records,
+          pagination: response.data.data.pagination,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch medical records",
+      };
+    }
+  },
+
+  // Get doctor medical records
+  getDoctorRecords: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.patientName)
+        params.append("patientName", filters.patientName);
+      if (filters.diagnosis) params.append("diagnosis", filters.diagnosis);
+      if (filters.page) params.append("page", filters.page);
+      if (filters.limit) params.append("limit", filters.limit);
+
+      const response = await api.get(`/medical-records/doctor?${params}`);
+      if (response.data.success) {
+        return {
+          success: true,
+          records: response.data.data.records,
+          pagination: response.data.data.pagination,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch medical records",
+      };
+    }
+  },
+
+  // Get medical records for specific patient (doctor view)
+  getPatientRecordsForDoctor: async (patientId) => {
+    try {
+      const response = await api.get(`/medical-records/patient/${patientId}`);
+      if (response.data.success) {
+        return {
+          success: true,
+          records: response.data.data.records,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch patient records",
+      };
+    }
+  },
+
+  // Create medical record (doctor)
+  createRecord: async (recordData) => {
+    try {
+      const response = await api.post("/medical-records", recordData);
+      if (response.data.success) {
+        return { success: true, record: response.data.data.record };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to create medical record",
+      };
+    }
+  },
+
+  // Update medical record (doctor)
+  updateRecord: async (recordId, recordData) => {
+    try {
+      const response = await api.put(
+        `/medical-records/${recordId}`,
+        recordData
+      );
+      if (response.data.success) {
+        return { success: true, record: response.data.data.record };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to update medical record",
+      };
+    }
+  },
+
+  // Get medical record by ID
+  getRecordById: async (recordId) => {
+    try {
+      const response = await api.get(`/medical-records/${recordId}`);
+      if (response.data.success) {
+        return { success: true, record: response.data.data.record };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch medical record",
+      };
+    }
+  },
+
+  // Delete medical record (doctor)
+  deleteRecord: async (recordId) => {
+    try {
+      const response = await api.delete(`/medical-records/${recordId}`);
+      if (response.data.success) {
+        return { success: true, message: response.data.message };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to delete medical record",
+      };
+    }
+  },
+};
+
+// Scheduling API calls
+export const schedulingAPI = {
+  // Get doctor availability for a specific date
+  getDoctorAvailability: async (doctorId, date) => {
+    try {
+      const response = await api.get(
+        `/schedules/doctor/${doctorId}/availability?date=${date}`
+      );
+      if (response.data.success) {
+        return {
+          success: true,
+          availableSlots: response.data.data.availableSlots,
+          doctorSchedule: response.data.data.doctorSchedule,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch availability",
+      };
+    }
+  },
+
+  // Get doctor's weekly availability (next 14 days)
+  getDoctorWeeklyAvailability: async (doctorId) => {
+    try {
+      const today = new Date();
+      const availabilityData = {};
+
+      // Get availability for next 14 days
+      for (let i = 1; i <= 14; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const dateString = date.toISOString().split("T")[0];
+
+        const result = await schedulingAPI.getDoctorAvailability(
+          doctorId,
+          dateString
+        );
+        if (result.success) {
+          availabilityData[dateString] = result.availableSlots;
+        }
+      }
+
+      return { success: true, weeklyAvailability: availabilityData };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Failed to fetch weekly availability",
+      };
+    }
+  },
+
+  // Check if specific time slot is available
+  checkSlotAvailability: async (doctorId, date, time) => {
+    try {
+      const response = await api.post("/schedules/check-availability", {
+        doctorId,
+        date,
+        time,
+      });
+      if (response.data.success) {
+        return {
+          success: true,
+          isAvailable: response.data.data.isAvailable,
+          reason: response.data.data.reason,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to check availability",
+      };
+    }
+  },
+
+  // Get doctor's current schedule (for doctors)
+  getMySchedule: async () => {
+    try {
+      const response = await api.get("/schedules/doctor/my-schedule");
+      if (response.data.success) {
+        return {
+          success: true,
+          schedules: response.data.data.schedules,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch schedule",
+      };
+    }
+  },
+
+  // Update doctor's schedule (for doctors)
+  updateMySchedule: async (schedules) => {
+    try {
+      const response = await api.put("/schedules/doctor/update-schedule", {
+        schedules,
+      });
+      if (response.data.success) {
+        return {
+          success: true,
+          schedules: response.data.data.schedules,
+          message: response.data.message,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to update schedule",
+      };
+    }
+  },
+};
+
 export default api;

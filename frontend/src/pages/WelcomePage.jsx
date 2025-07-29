@@ -38,6 +38,16 @@ const WelcomePage = ({
 
       if (result.success) {
         const { user } = result;
+
+        // Check if the user's role matches the selected user role tab
+        if (user.role !== userRole) {
+          setError(
+            `Invalid credentials for ${userRole} login. Please check your credentials or switch to the correct login tab.`
+          );
+          setLoading(false);
+          return;
+        }
+
         setUserType(user.role);
         setCurrentUser(user);
         setIsAuthenticated(true);
@@ -48,10 +58,11 @@ const WelcomePage = ({
           setCurrentView("doctor-appointments");
         }
       } else {
-        setError(result.message || "Login failed");
+        setError(result.message || "Login failed. Please try again.");
       }
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Network error. Please check your connection.");
     } finally {
       setLoading(false);
     }
@@ -62,9 +73,8 @@ const WelcomePage = ({
     setLoading(true);
     setError("");
 
-    // Validation
     if (registerForm.password !== registerForm.confirmPassword) {
-      setError("Passwords don't match");
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
@@ -97,6 +107,16 @@ const WelcomePage = ({
 
       if (result.success) {
         const { user } = result;
+
+        // Check if the registered user's role matches the selected user role tab
+        if (user.role !== userRole) {
+          setError(
+            `Registration error: User was registered as ${user.role} but you selected ${userRole}. Please contact support.`
+          );
+          setLoading(false);
+          return;
+        }
+
         setUserType(user.role);
         setCurrentUser(user);
         setIsAuthenticated(true);
@@ -107,332 +127,412 @@ const WelcomePage = ({
           setCurrentView("doctor-appointments");
         }
       } else {
-        setError(result.message || "Registration failed");
+        setError(result.message || "Registration failed. Please try again.");
       }
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError("Network error. Please check your connection.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleLoginInputChange = (e) => {
-    setLoginForm({
-      ...loginForm,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setLoginForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleRegisterInputChange = (e) => {
-    setRegisterForm({
-      ...registerForm,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setRegisterForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="text-6xl mb-4">🏥</div>
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
-            Ring A Doctor (RAD)
-          </h2>
-          <p className="text-gray-600">
-            Your trusted medical appointment platform
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-black/30"></div>
+      </div>
 
-        {/* Role Selection */}
-        <div className="flex justify-center">
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setUserRole("patient")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition duration-200 ${
-                userRole === "patient"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:text-blue-600"
-              }`}
+      <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        {/* Left side - Branding */}
+        <div className="text-center lg:text-left animate-fade-in-up">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl mb-8 shadow-2xl relative">
+            <svg
+              className="w-10 h-10 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              👨‍🦱 Patient
-            </button>
-            <button
-              onClick={() => setUserRole("doctor")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition duration-200 ${
-                userRole === "doctor"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:text-blue-600"
-              }`}
-            >
-              👨‍⚕️ Doctor
-            </button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+              />
+            </svg>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></div>
+          </div>
+
+          <h1 className="text-5xl lg:text-6xl font-bold text-white mb-4">
+            Ring A{" "}
+            <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              Doctor
+            </span>
+          </h1>
+
+          <p className="text-xl text-gray-300 mb-8 max-w-md mx-auto lg:mx-0">
+            Revolutionary healthcare platform connecting patients with
+            world-class medical professionals
+          </p>
+
+          <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+            <div className="flex items-center text-gray-300">
+              <svg
+                className="w-5 h-5 mr-2 text-green-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              24/7 Medical Support
+            </div>
+            <div className="flex items-center text-gray-300">
+              <svg
+                className="w-5 h-5 mr-2 text-green-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Secure & Private
+            </div>
+            <div className="flex items-center text-gray-300">
+              <svg
+                className="w-5 h-5 mr-2 text-green-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Expert Specialists
+            </div>
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab("login")}
-            className={`flex-1 py-2 px-1 text-center border-b-2 font-medium text-sm ${
-              activeTab === "login"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setActiveTab("register")}
-            className={`flex-1 py-2 px-1 text-center border-b-2 font-medium text-sm ${
-              activeTab === "register"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-          >
-            Register
-          </button>
-        </div>
-
-        {/* Forms */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">{error}</p>
+        {/* Right side - Auth Form */}
+        <div className="animate-scale-in">
+          <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8 max-w-md mx-auto">
+            {/* Role Selection */}
+            <div className="flex bg-black/20 rounded-2xl p-1 mb-6">
+              <button
+                onClick={() => setUserRole("patient")}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${
+                  userRole === "patient"
+                    ? "bg-white text-gray-900 shadow-lg"
+                    : "text-white/70 hover:text-white"
+                }`}
+              >
+                <svg
+                  className="w-4 h-4 inline mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                Patient
+              </button>
+              <button
+                onClick={() => setUserRole("doctor")}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${
+                  userRole === "doctor"
+                    ? "bg-white text-gray-900 shadow-lg"
+                    : "text-white/70 hover:text-white"
+                }`}
+              >
+                <svg
+                  className="w-4 h-4 inline mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 8v8M8 12h8"
+                  />
+                </svg>
+                Doctor
+              </button>
             </div>
-          )}
 
-          {activeTab === "login" ? (
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={loginForm.email}
-                  onChange={handleLoginInputChange}
-                  placeholder="e.g., john@patient.com or sarah@doctor.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                  disabled={loading}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={loginForm.password}
-                  onChange={handleLoginInputChange}
-                  placeholder="Enter your password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                  disabled={loading}
-                />
-              </div>
+            {/* Tab Navigation */}
+            <div className="flex bg-black/20 rounded-2xl p-1 mb-8">
+              <button
+                onClick={() => setActiveTab("login")}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${
+                  activeTab === "login"
+                    ? "bg-white text-gray-900 shadow-lg"
+                    : "text-white/70 hover:text-white"
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => setActiveTab("register")}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${
+                  activeTab === "register"
+                    ? "bg-white text-gray-900 shadow-lg"
+                    : "text-white/70 hover:text-white"
+                }`}
+              >
+                Sign Up
+              </button>
+            </div>
 
-              {/* Sample Credentials Helper */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-blue-800 text-sm font-medium mb-2">
-                  Sample Login Credentials:
-                </p>
-                <div className="text-blue-700 text-sm space-y-1">
-                  <p>
-                    <strong>Patient:</strong> john@patient.com / password123
-                  </p>
-                  <p>
-                    <strong>Doctor:</strong> sarah@doctor.com / password123
-                  </p>
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-2xl backdrop-blur-sm">
+                <p className="text-red-200 text-sm font-medium">{error}</p>
+              </div>
+            )}
+
+            {activeTab === "login" ? (
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={loginForm.email}
+                    onChange={handleLoginInputChange}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-all duration-300"
+                    placeholder="Enter your email"
+                    required
+                  />
                 </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105 disabled:transform-none"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Logging in...
-                  </span>
-                ) : (
-                  `Login as ${userRole === "patient" ? "Patient" : "Doctor"}`
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={loginForm.password}
+                    onChange={handleLoginInputChange}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-all duration-300"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none shadow-lg"
+                >
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Signing In...
+                    </div>
+                  ) : (
+                    "Sign In"
+                  )}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleRegister} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={registerForm.fullName}
+                    onChange={handleRegisterInputChange}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-all duration-300"
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={registerForm.email}
+                    onChange={handleRegisterInputChange}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-all duration-300"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={registerForm.phone}
+                    onChange={handleRegisterInputChange}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-all duration-300"
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                </div>
+                {userRole === "doctor" && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">
+                        Specialization
+                      </label>
+                      <input
+                        type="text"
+                        name="specialization"
+                        value={registerForm.specialization}
+                        onChange={handleRegisterInputChange}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-all duration-300"
+                        placeholder="e.g., Cardiology, Neurology"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">
+                        License Number
+                      </label>
+                      <input
+                        type="text"
+                        name="licenseNumber"
+                        value={registerForm.licenseNumber}
+                        onChange={handleRegisterInputChange}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-all duration-300"
+                        placeholder="Enter your medical license number"
+                        required
+                      />
+                    </div>
+                  </>
                 )}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={registerForm.fullName}
-                  onChange={handleRegisterInputChange}
-                  placeholder="Enter your full name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={registerForm.email}
-                  onChange={handleRegisterInputChange}
-                  placeholder="Enter your email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={registerForm.phone}
-                  onChange={handleRegisterInputChange}
-                  placeholder="Enter your phone number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              {/* Doctor-specific fields */}
-              {userRole === "doctor" && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Specialization
-                    </label>
-                    <select
-                      name="specialization"
-                      value={registerForm.specialization}
-                      onChange={handleRegisterInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Select specialization</option>
-                      <option value="Cardiology">Cardiology</option>
-                      <option value="Neurology">Neurology</option>
-                      <option value="Pediatrics">Pediatrics</option>
-                      <option value="Orthopedics">Orthopedics</option>
-                      <option value="Dermatology">Dermatology</option>
-                      <option value="General Medicine">General Medicine</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Medical License Number
-                    </label>
-                    <input
-                      type="text"
-                      name="licenseNumber"
-                      value={registerForm.licenseNumber}
-                      onChange={handleRegisterInputChange}
-                      placeholder="Enter your license number"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={registerForm.password}
-                  onChange={handleRegisterInputChange}
-                  placeholder="Create a password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={registerForm.confirmPassword}
-                  onChange={handleRegisterInputChange}
-                  placeholder="Confirm your password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105 disabled:transform-none"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Registering...
-                  </span>
-                ) : (
-                  `Register as ${userRole === "patient" ? "Patient" : "Doctor"}`
-                )}
-              </button>
-            </form>
-          )}
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={registerForm.password}
+                    onChange={handleRegisterInputChange}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-all duration-300"
+                    placeholder="Create a password"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={registerForm.confirmPassword}
+                    onChange={handleRegisterInputChange}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-all duration-300"
+                    placeholder="Confirm your password"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none shadow-lg"
+                >
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Creating Account...
+                    </div>
+                  ) : (
+                    `Create ${
+                      userRole === "patient" ? "Patient" : "Doctor"
+                    } Account`
+                  )}
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>

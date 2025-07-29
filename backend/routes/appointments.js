@@ -80,7 +80,9 @@ router.get("/patient", auth, requirePatient, async (req, res) => {
 
     const filter = { patient: req.user._id };
     if (status) {
-      filter.status = status;
+      // Handle multiple status values (e.g., "confirmed,pending,scheduled")
+      const statusArray = status.split(",");
+      filter.status = { $in: statusArray };
     }
 
     const skip = (page - 1) * limit;
@@ -124,7 +126,9 @@ router.get("/doctor", auth, requireDoctor, async (req, res) => {
     const filter = { doctor: req.user._id };
 
     if (status) {
-      filter.status = status;
+      // Handle multiple status values (e.g., "confirmed,pending,scheduled")
+      const statusArray = status.split(",");
+      filter.status = { $in: statusArray };
     }
 
     if (date) {

@@ -16,38 +16,58 @@ const medicalRecordSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Appointment",
     },
-    visitDate: {
+    recordDate: {
       type: Date,
       required: true,
       default: Date.now,
-    },
-    chiefComplaint: {
-      type: String,
-      required: true,
-    },
-    historyOfPresentIllness: {
-      type: String,
-    },
-    physicalExamination: {
-      type: String,
-    },
-    vitalSigns: {
-      bloodPressure: {
-        systolic: Number,
-        diastolic: Number,
-      },
-      heartRate: Number,
-      temperature: Number, // in Celsius
-      respiratoryRate: Number,
-      oxygenSaturation: Number,
-      weight: Number, // in kg
-      height: Number, // in cm
     },
     diagnosis: {
       type: String,
       required: true,
     },
+    symptoms: {
+      type: String,
+    },
     treatment: {
+      type: String,
+    },
+    medications: [
+      {
+        name: String,
+        dosage: String,
+        frequency: String,
+        duration: String,
+        instructions: String,
+      },
+    ],
+    vitalSigns: {
+      bloodPressure: String,
+      heartRate: String,
+      temperature: String,
+      weight: String,
+    },
+    notes: {
+      type: String,
+    },
+    followUpRequired: {
+      type: Boolean,
+      default: false,
+    },
+    followUpDate: {
+      type: Date,
+    },
+    // Keep legacy fields for backward compatibility
+    visitDate: {
+      type: Date,
+      default: Date.now,
+    },
+    chiefComplaint: {
+      type: String,
+    },
+    historyOfPresentIllness: {
+      type: String,
+    },
+    physicalExamination: {
       type: String,
     },
     labResults: [
@@ -74,16 +94,6 @@ const medicalRecordSchema = new mongoose.Schema(
         },
       },
     ],
-    followUpRequired: {
-      type: Boolean,
-      default: false,
-    },
-    followUpDate: {
-      type: Date,
-    },
-    notes: {
-      type: String,
-    },
   },
   {
     timestamps: true,
@@ -91,8 +101,9 @@ const medicalRecordSchema = new mongoose.Schema(
 );
 
 // Indexes for better query performance
-medicalRecordSchema.index({ patient: 1, visitDate: -1 });
-medicalRecordSchema.index({ doctor: 1, visitDate: -1 });
+medicalRecordSchema.index({ patient: 1, recordDate: -1 });
+medicalRecordSchema.index({ doctor: 1, recordDate: -1 });
 medicalRecordSchema.index({ appointment: 1 });
+medicalRecordSchema.index({ patient: 1, visitDate: -1 }); // Legacy support
 
 module.exports = mongoose.model("MedicalRecord", medicalRecordSchema);

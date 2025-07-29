@@ -8,6 +8,8 @@ const authRoutes = require("./routes/auth");
 const doctorRoutes = require("./routes/doctors");
 const appointmentRoutes = require("./routes/appointments");
 const prescriptionRoutes = require("./routes/prescriptions");
+const medicalRecordsRoutes = require("./routes/medicalRecords");
+const scheduleRoutes = require("./routes/schedules");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,6 +38,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/prescriptions", prescriptionRoutes);
+app.use("/api/medical-records", medicalRecordsRoutes);
+app.use("/api/schedules", scheduleRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {
