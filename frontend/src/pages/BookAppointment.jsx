@@ -1,45 +1,104 @@
-import React, { useState } from "react";
-import { appointmentsAPI } from "../services/api";
+import React, { useState, useEffect } from "react";
+import { appointmentsAPI, schedulingAPI } from "../services/api";
 
 const BookAppointment = ({ selectedDoctor, setCurrentView, currentUser }) => {
   const [formData, setFormData] = useState({
+    selectedDate: "",
     selectedSlot: "",
     reason: "",
     notes: "",
+    appointmentType: "consultation",
     patientName: currentUser?.name || "Unknown User",
     patientEmail: currentUser?.email || "",
     patientPhone: currentUser?.phone || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [weeklyAvailability, setWeeklyAvailability] = useState({});
+  const [selectedDateSlots, setSelectedDateSlots] = useState([]);
 
-  // Generate default time slots for the next 7 days
-  const generateDefaultSlots = () => {
-    const slots = [];
+  // Load doctor's weekly availability when component mounts
+  useEffect(() => {
+    if (selectedDoctor?._id) {
+      loadWeeklyAvailability();
+    }
+  }, [selectedDoctor]);
+
+  // Load slots when date changes
+  useEffect(() => {
+    if (formData.selectedDate) {
+      loadSlotsForDate(formData.selectedDate);
+    }
+  }, [formData.selectedDate]);
+
+  const loadWeeklyAvailability = async () => {
+    try {
+      const result = await schedulingAPI.getDoctorWeeklyAvailability(
+        selectedDoctor._id
+      );
+      if (result.success) {
+        setWeeklyAvailability(result.weeklyAvailability);
+      }
+    } catch (error) {
+      console.error("Error loading weekly availability:", error);
+    }
+  };
+
+  const loadSlotsForDate = async (date) => {
+    setLoadingSlots(true);
+    try {
+      const result = await schedulingAPI.getDoctorAvailability(
+        selectedDoctor._id,
+        date
+      );
+      if (result.success) {
+        setSelectedDateSlots(result.availableSlots);
+      } else {
+        setSelectedDateSlots([]);
+        console.error("No slots available:", result.message);
+      }
+    } catch (error) {
+      console.error("Error loading slots:", error);
+      setSelectedDateSlots([]);
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  // Generate next 14 days for date selection
+  const getAvailableDates = () => {
+    const dates = [];
     const today = new Date();
 
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 14; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
+      const dateString = date.toISOString().split("T")[0];
 
-      // Generate morning and afternoon slots
-      const morningSlot = new Date(date);
-      morningSlot.setHours(9, 0, 0, 0);
+      // Check if this date has any available slots
+      const hasSlots = weeklyAvailability[dateString]?.length > 0;
 
-      const afternoonSlot = new Date(date);
-      afternoonSlot.setHours(14, 0, 0, 0);
-
-      const eveningSlot = new Date(date);
-      eveningSlot.setHours(16, 30, 0, 0);
-
-      slots.push(
-        morningSlot.toISOString(),
-        afternoonSlot.toISOString(),
-        eveningSlot.toISOString()
-      );
+      dates.push({
+        value: dateString,
+        label: date.toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        }),
+        fullDate: date.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        hasSlots,
+        isWeekend: date.getDay() === 0 || date.getDay() === 6,
+      });
     }
 
-    return slots;
+    return dates;
   };
 
   const handleInputChange = (e) => {
@@ -55,12 +114,35 @@ const BookAppointment = ({ selectedDoctor, setCurrentView, currentUser }) => {
     setIsSubmitting(true);
 
     try {
+      // Validate slot availability before submitting
+      const [datePart, timePart] = formData.selectedSlot.split("T");
+      const timeString = timePart
+        ? timePart.slice(0, 5)
+        : formData.selectedSlot;
+
+      const availabilityCheck = await schedulingAPI.checkSlotAvailability(
+        selectedDoctor._id,
+        formData.selectedDate,
+        timeString
+      );
+
+      if (!availabilityCheck.success || !availabilityCheck.isAvailable) {
+        alert(
+          `This time slot is no longer available: ${
+            availabilityCheck.reason || "Unknown reason"
+          }`
+        );
+        setIsSubmitting(false);
+        // Refresh slots for selected date
+        loadSlotsForDate(formData.selectedDate);
+        return;
+      }
+
       // Prepare appointment data for API
-      const selectedDate = new Date(formData.selectedSlot);
       const appointmentData = {
         doctorId: selectedDoctor._id,
-        date: selectedDate.toISOString().split("T")[0], // YYYY-MM-DD format
-        time: selectedDate.toTimeString().slice(0, 5), // HH:MM format
+        date: formData.selectedDate,
+        time: timeString,
         reason: formData.reason,
         type: formData.appointmentType,
         symptoms: formData.notes ? [formData.notes] : [],
@@ -130,8 +212,10 @@ const BookAppointment = ({ selectedDoctor, setCurrentView, currentUser }) => {
               </p>
               <p className="text-green-200 mb-2">
                 <strong>Date & Time:</strong>{" "}
-                {new Date(formData.selectedSlot).toLocaleDateString()} at{" "}
-                {new Date(formData.selectedSlot).toLocaleTimeString([], {
+                {new Date(formData.selectedDate).toLocaleDateString()} at{" "}
+                {new Date(
+                  `2000-01-01 ${formData.selectedSlot}`
+                ).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -244,51 +328,142 @@ const BookAppointment = ({ selectedDoctor, setCurrentView, currentUser }) => {
           <div className="lg:col-span-2">
             <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Available Time Slots */}
+                {/* Available Dates */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-3">
-                    Select Available Time Slot *
+                    Select Date *
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {(
-                      selectedDoctor?.availableSlots || generateDefaultSlots()
-                    ).map((slot, index) => (
-                      <label key={index} className="relative">
-                        <input
-                          type="radio"
-                          name="selectedSlot"
-                          value={slot}
-                          checked={formData.selectedSlot === slot}
-                          onChange={handleInputChange}
-                          className="sr-only"
-                          required
-                        />
-                        <div
-                          className={`border-2 rounded-lg p-4 cursor-pointer transition duration-200 ${
-                            formData.selectedSlot === slot
-                              ? "border-blue-400 bg-blue-500/20"
-                              : "border-white/20 hover:border-blue-400/50 bg-white/5"
-                          }`}
-                        >
-                          <div className="text-center">
-                            <p className="font-medium text-gray-200">
-                              {new Date(slot).toLocaleDateString("en-US", {
-                                weekday: "short",
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </p>
-                            <p className="text-blue-300 font-bold">
-                              {new Date(slot).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                      </label>
+                  <select
+                    name="selectedDate"
+                    value={formData.selectedDate}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                  >
+                    <option value="" className="bg-gray-800">
+                      Choose a date
+                    </option>
+                    {getAvailableDates().map((date) => (
+                      <option
+                        key={date.value}
+                        value={date.value}
+                        disabled={!date.hasSlots}
+                        className="bg-gray-800"
+                      >
+                        {date.label}{" "}
+                        {date.hasSlots ? "" : " (No slots available)"}{" "}
+                        {date.isWeekend ? " (Weekend)" : ""}
+                      </option>
                     ))}
+                  </select>
+                  {formData.selectedDate && (
+                    <p className="text-sm text-blue-300 mt-1">
+                      Selected:{" "}
+                      {
+                        getAvailableDates().find(
+                          (d) => d.value === formData.selectedDate
+                        )?.fullDate
+                      }
+                    </p>
+                  )}
+                </div>
+
+                {/* Available Time Slots */}
+                {formData.selectedDate && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-3">
+                      Select Available Time Slot *
+                    </label>
+                    {loadingSlots ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                        <p className="text-gray-300 text-sm">
+                          Loading available slots...
+                        </p>
+                      </div>
+                    ) : selectedDateSlots.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {selectedDateSlots.map((slot, index) => (
+                          <label key={index} className="relative">
+                            <input
+                              type="radio"
+                              name="selectedSlot"
+                              value={slot.time}
+                              checked={formData.selectedSlot === slot.time}
+                              onChange={handleInputChange}
+                              className="sr-only"
+                              required
+                            />
+                            <div
+                              className={`border-2 rounded-xl p-3 cursor-pointer transition duration-200 text-center ${
+                                formData.selectedSlot === slot.time
+                                  ? "border-blue-400 bg-blue-500/20"
+                                  : "border-white/20 hover:border-blue-400/50 bg-white/5"
+                              }`}
+                            >
+                              <p className="font-medium text-gray-200 text-sm">
+                                {new Date(
+                                  `2000-01-01 ${slot.time}`
+                                ).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <svg
+                          className="w-8 h-8 text-red-400 mx-auto mb-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <p className="text-red-300 text-sm">
+                          No available slots for this date
+                        </p>
+                        <p className="text-red-400 text-xs mt-1">
+                          Please select a different date
+                        </p>
+                      </div>
+                    )}
                   </div>
+                )}
+
+                {/* Appointment Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Appointment Type *
+                  </label>
+                  <select
+                    name="appointmentType"
+                    value={formData.appointmentType}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                  >
+                    <option value="consultation" className="bg-gray-800">
+                      Consultation
+                    </option>
+                    <option value="follow-up" className="bg-gray-800">
+                      Follow-up
+                    </option>
+                    <option value="check-up" className="bg-gray-800">
+                      Check-up
+                    </option>
+                    <option value="emergency" className="bg-gray-800">
+                      Emergency
+                    </option>
+                  </select>
                 </div>
 
                 {/* Reason for Visit */}
@@ -398,7 +573,7 @@ const BookAppointment = ({ selectedDoctor, setCurrentView, currentUser }) => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center shadow-lg"
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-medium py-2 px-4 rounded-xl transition duration-200 flex items-center justify-center shadow-lg text-sm"
                   >
                     {isSubmitting ? (
                       <>

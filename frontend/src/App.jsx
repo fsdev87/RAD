@@ -9,6 +9,7 @@ import PatientMedicalRecords from "./pages/PatientMedicalRecords";
 import DoctorAppointments from "./pages/DoctorAppointments";
 import DoctorPrescriptions from "./pages/DoctorPrescriptions";
 import DoctorMedicalRecords from "./pages/DoctorMedicalRecords";
+import DoctorScheduleManager from "./pages/DoctorScheduleManager";
 import { authAPI, apiUtils } from "./services/api";
 
 const App = () => {
@@ -174,6 +175,8 @@ const App = () => {
           return <DoctorPrescriptions />;
         case "doctor-medical-records":
           return <DoctorMedicalRecords />;
+        case "doctor-schedule":
+          return <DoctorScheduleManager />;
         default:
           return <DoctorAppointments />;
       }

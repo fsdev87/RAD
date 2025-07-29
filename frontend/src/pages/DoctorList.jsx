@@ -236,7 +236,7 @@ const DoctorList = ({ setCurrentView, setSelectedDoctor }) => {
             </div>
 
             {/* Doctors Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredDoctors.map((doctor) => (
                 <div
                   key={doctor._id}
@@ -247,14 +247,14 @@ const DoctorList = ({ setCurrentView, setSelectedDoctor }) => {
                     <img
                       src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
                         doctor.name
-                      )}&background=6366f1&color=ffffff&size=400&bold=true`}
+                      )}&background=6366f1&color=ffffff&size=300&bold=true`}
                       alt={doctor.name}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-4 right-4">
-                      <span className="bg-green-500/20 text-green-300 border border-green-500/30 px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1">
+                    <div className="absolute top-2 right-2">
+                      <span className="bg-green-500/20 text-green-300 border border-green-500/30 px-2 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1">
                         <svg
-                          className="w-3 h-3"
+                          className="w-2 h-2"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -271,14 +271,16 @@ const DoctorList = ({ setCurrentView, setSelectedDoctor }) => {
                   </div>
 
                   {/* Doctor Info */}
-                  <div className="p-6">
-                    <div className="mb-4">
-                      <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-300 transition-colors duration-300">
-                        Dr. {doctor.name}
+                  <div className="p-4">
+                    <div className="mb-3">
+                      <h3 className="text-lg font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300 line-clamp-1">
+                        {doctor.name.startsWith("Dr.")
+                          ? doctor.name
+                          : `Dr. ${doctor.name}`}
                       </h3>
-                      <div className="flex items-center mb-2">
+                      <div className="flex items-center mb-1">
                         <svg
-                          className="w-4 h-4 text-blue-400 mr-2"
+                          className="w-3 h-3 text-blue-400 mr-1"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -290,13 +292,13 @@ const DoctorList = ({ setCurrentView, setSelectedDoctor }) => {
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
-                        <span className="text-blue-300 font-semibold text-sm">
+                        <span className="text-blue-300 font-semibold text-xs line-clamp-1">
                           {doctor.specialization}
                         </span>
                       </div>
-                      <p className="text-gray-400 text-sm flex items-center">
+                      <p className="text-gray-400 text-xs flex items-center line-clamp-1">
                         <svg
-                          className="w-4 h-4 mr-1"
+                          className="w-3 h-3 mr-1"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -312,10 +314,10 @@ const DoctorList = ({ setCurrentView, setSelectedDoctor }) => {
                       </p>
                     </div>
 
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center text-sm">
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center text-xs">
                         <svg
-                          className="w-4 h-4 text-gray-500 mr-3"
+                          className="w-3 h-3 text-gray-500 mr-2"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -327,13 +329,13 @@ const DoctorList = ({ setCurrentView, setSelectedDoctor }) => {
                             d="M3 8l7.89 7.89a2 2 0 002.82 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                           />
                         </svg>
-                        <span className="text-gray-300 truncate">
+                        <span className="text-gray-300 truncate text-xs">
                           {doctor.email}
                         </span>
                       </div>
-                      <div className="flex items-center text-sm">
+                      <div className="flex items-center text-xs">
                         <svg
-                          className="w-4 h-4 text-gray-500 mr-3"
+                          className="w-3 h-3 text-gray-500 mr-2"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -345,17 +347,19 @@ const DoctorList = ({ setCurrentView, setSelectedDoctor }) => {
                             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                           />
                         </svg>
-                        <span className="text-gray-300">{doctor.phone}</span>
+                        <span className="text-gray-300 text-xs">
+                          {doctor.phone}
+                        </span>
                       </div>
                     </div>
 
                     {/* Book Appointment Button */}
                     <button
                       onClick={() => handleBookAppointment(doctor)}
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg group-hover:shadow-xl"
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-2 px-4 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg group-hover:shadow-xl text-sm"
                     >
                       <svg
-                        className="w-4 h-4 mr-2 inline"
+                        className="w-3 h-3 mr-2 inline"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

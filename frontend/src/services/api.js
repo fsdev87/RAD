@@ -635,4 +635,126 @@ export const medicalRecordsAPI = {
   },
 };
 
+// Scheduling API calls
+export const schedulingAPI = {
+  // Get doctor availability for a specific date
+  getDoctorAvailability: async (doctorId, date) => {
+    try {
+      const response = await api.get(
+        `/schedules/doctor/${doctorId}/availability?date=${date}`
+      );
+      if (response.data.success) {
+        return {
+          success: true,
+          availableSlots: response.data.data.availableSlots,
+          doctorSchedule: response.data.data.doctorSchedule,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch availability",
+      };
+    }
+  },
+
+  // Get doctor's weekly availability (next 14 days)
+  getDoctorWeeklyAvailability: async (doctorId) => {
+    try {
+      const today = new Date();
+      const availabilityData = {};
+
+      // Get availability for next 14 days
+      for (let i = 1; i <= 14; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const dateString = date.toISOString().split("T")[0];
+
+        const result = await schedulingAPI.getDoctorAvailability(
+          doctorId,
+          dateString
+        );
+        if (result.success) {
+          availabilityData[dateString] = result.availableSlots;
+        }
+      }
+
+      return { success: true, weeklyAvailability: availabilityData };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Failed to fetch weekly availability",
+      };
+    }
+  },
+
+  // Check if specific time slot is available
+  checkSlotAvailability: async (doctorId, date, time) => {
+    try {
+      const response = await api.post("/schedules/check-availability", {
+        doctorId,
+        date,
+        time,
+      });
+      if (response.data.success) {
+        return {
+          success: true,
+          isAvailable: response.data.data.isAvailable,
+          reason: response.data.data.reason,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to check availability",
+      };
+    }
+  },
+
+  // Get doctor's current schedule (for doctors)
+  getMySchedule: async () => {
+    try {
+      const response = await api.get("/schedules/doctor/my-schedule");
+      if (response.data.success) {
+        return {
+          success: true,
+          schedules: response.data.data.schedules,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch schedule",
+      };
+    }
+  },
+
+  // Update doctor's schedule (for doctors)
+  updateMySchedule: async (schedules) => {
+    try {
+      const response = await api.put("/schedules/doctor/update-schedule", {
+        schedules,
+      });
+      if (response.data.success) {
+        return {
+          success: true,
+          schedules: response.data.data.schedules,
+          message: response.data.message,
+        };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to update schedule",
+      };
+    }
+  },
+};
+
 export default api;

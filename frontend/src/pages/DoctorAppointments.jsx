@@ -7,19 +7,108 @@ const DoctorAppointments = ({ setCurrentView }) => {
   const [allAppointments, setAllAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pages: 1,
+    total: 0,
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Statistics state
+  const [statistics, setStatistics] = useState({
+    today: 0,
+    upcoming: 0,
+    missed: 0,
+    completed: 0,
+  });
 
-  // Fetch doctor appointments from API
+  // Reset pagination when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setPagination({ current: 1, pages: 1, total: 0 });
+  }, [selectedTab]);
+
+  // Fetch statistics for the dashboard
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        
+        // Fetch today's appointments
+        const todayResult = await appointmentsAPI.getDoctorAppointments({
+          date: today,
+          status: "confirmed,pending,scheduled",
+          limit: 1, // Just get count
+        });
+
+        // Fetch upcoming appointments (excluding today)
+        const upcomingResult = await appointmentsAPI.getDoctorAppointments({
+          status: "confirmed,pending,scheduled",
+          limit: 1, // Just get count
+        });
+
+        // Fetch missed appointments
+        const missedResult = await appointmentsAPI.getDoctorAppointments({
+          status: "no-show",
+          limit: 1, // Just get count
+        });
+
+        // Fetch completed appointments
+        const completedResult = await appointmentsAPI.getDoctorAppointments({
+          status: "completed",
+          limit: 1, // Just get count
+        });
+
+        setStatistics({
+          today: todayResult.success ? todayResult.pagination?.total || 0 : 0,
+          upcoming: upcomingResult.success ? upcomingResult.pagination?.total || 0 : 0,
+          missed: missedResult.success ? missedResult.pagination?.total || 0 : 0,
+          completed: completedResult.success ? completedResult.pagination?.total || 0 : 0,
+        });
+      } catch (error) {
+        console.error("Error fetching statistics:", error);
+      }
+    };
+
+    fetchStatistics();
+  }, []);
+
+  // Fetch doctor appointments from API based on selected tab
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
         setLoading(true);
-        console.log("Fetching doctor appointments...");
-        const result = await appointmentsAPI.getDoctorAppointments();
+        console.log(`Fetching ${selectedTab} doctor appointments...`);
+
+        let filters = {
+          page: currentPage,
+          limit: itemsPerPage,
+        };
+
+        // Add tab-specific filters
+        const today = new Date().toISOString().split("T")[0];
+
+        if (selectedTab === "today") {
+          filters.date = today;
+          filters.status = "confirmed,pending,scheduled";
+        } else if (selectedTab === "upcoming") {
+          filters.status = "confirmed,pending,scheduled";
+          // Don't include today's date filter for upcoming
+        } else if (selectedTab === "missed") {
+          filters.status = "no-show";
+        } else if (selectedTab === "past") {
+          filters.status = "completed";
+        }
+
+        const result = await appointmentsAPI.getDoctorAppointments(filters);
         console.log("Doctor appointments API result:", result);
 
         if (result.success) {
           console.log("Doctor appointments data:", result.appointments);
           setAllAppointments(result.appointments || []);
+          setPagination(
+            result.pagination || { current: 1, pages: 1, total: 0 }
+          );
         } else {
           console.error("Doctor appointments API error:", result.message);
           setError(result.message || "Failed to fetch appointments");
@@ -33,43 +122,10 @@ const DoctorAppointments = ({ setCurrentView }) => {
     };
 
     fetchAppointments();
-  }, []);
+  }, [currentPage, selectedTab]);
 
-  // Categorize appointments properly
-  const today = new Date().toISOString().split("T")[0];
-
-  const todayAppointments = allAppointments.filter((apt) => {
-    const appointmentDate = apt.date.split("T")[0]; // Get just the date part
-    return (
-      appointmentDate === today &&
-      apt.status !== "completed" &&
-      apt.status !== "cancelled"
-    );
-  });
-
-  const upcomingAppointments = allAppointments.filter((apt) => {
-    const appointmentDate = apt.date.split("T")[0]; // Get just the date part
-    return (
-      appointmentDate > today &&
-      apt.status !== "completed" &&
-      apt.status !== "cancelled"
-    );
-  });
-
-  // Missed appointments (past due and need status update)
-  const missedAppointments = allAppointments.filter((apt) => {
-    const appointmentDate = apt.date.split("T")[0];
-    return (
-      appointmentDate < today &&
-      apt.status !== "completed" &&
-      apt.status !== "cancelled"
-    );
-  });
-
-  // Only show completed and cancelled appointments in past
-  const pastAppointments = allAppointments.filter((apt) => {
-    return apt.status === "completed" || apt.status === "cancelled";
-  });
+  // Use appointments directly from API (already filtered by backend)
+  const today = new Date().toISOString().split("T")[0]; // For overdue check
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -231,17 +287,17 @@ const DoctorAppointments = ({ setCurrentView }) => {
           <div className="flex space-x-3">
             <button
               onClick={() => setSelectedAppointment(appointment)}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-2 px-4 rounded-xl transition-all duration-300 font-medium"
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl transition-all duration-300 font-medium text-sm"
             >
               Start Consultation
             </button>
             <button
               onClick={() => setCurrentView && setCurrentView("prescriptions")}
-              className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-300 font-medium"
+              className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-300 font-medium text-sm"
             >
               Create Prescription
             </button>
-            <button className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-all duration-300 text-white font-medium">
+            <button className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-all duration-300 text-white font-medium text-sm">
               Reschedule
             </button>
           </div>
@@ -251,13 +307,13 @@ const DoctorAppointments = ({ setCurrentView }) => {
           <div className="flex space-x-3">
             <button
               onClick={() => handleStatusUpdate(appointment._id, "confirmed")}
-              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 px-4 rounded-xl transition-all duration-300 font-medium"
+              className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-300 font-medium text-sm"
             >
-              Confirm Appointment
+              Confirm
             </button>
             <button
               onClick={() => handleStatusUpdate(appointment._id, "cancelled")}
-              className="px-4 py-2 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl hover:bg-red-500/30 transition-all duration-300 font-medium"
+              className="px-4 py-2 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl hover:bg-red-500/30 transition-all duration-300 font-medium text-sm"
             >
               Cancel
             </button>
@@ -268,13 +324,13 @@ const DoctorAppointments = ({ setCurrentView }) => {
           <div className="flex space-x-3">
             <button
               onClick={() => handleStatusUpdate(appointment._id, "confirmed")}
-              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 px-4 rounded-xl transition-all duration-300 font-medium"
+              className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-300 font-medium text-sm"
             >
               Confirm
             </button>
             <button
               onClick={() => handleStatusUpdate(appointment._id, "cancelled")}
-              className="px-4 py-2 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl hover:bg-red-500/30 transition-all duration-300 font-medium"
+              className="px-4 py-2 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl hover:bg-red-500/30 transition-all duration-300 font-medium text-sm"
             >
               Decline
             </button>
@@ -555,7 +611,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">
-                  {todayAppointments.length}
+                  {selectedTab === "today" ? pagination.total : statistics.today}
                 </p>
                 <p className="text-gray-300 font-medium">Today</p>
               </div>
@@ -580,7 +636,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">
-                  {upcomingAppointments.length}
+                  {statistics.upcoming}
                 </p>
                 <p className="text-gray-300 font-medium">Upcoming</p>
               </div>
@@ -605,7 +661,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">
-                  {missedAppointments.length}
+                  {statistics.missed}
                 </p>
                 <p className="text-gray-300 font-medium">Missed</p>
               </div>
@@ -630,7 +686,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">
-                  {pastAppointments.length}
+                  {statistics.completed}
                 </p>
                 <p className="text-gray-300 font-medium">Completed</p>
               </div>
@@ -669,43 +725,44 @@ const DoctorAppointments = ({ setCurrentView }) => {
             <nav className="flex space-x-2">
               <button
                 onClick={() => setSelectedTab("today")}
-                className={`py-3 px-6 rounded-xl font-medium text-sm transition-all duration-300 ${
+                className={`py-2 px-4 rounded-xl font-medium text-sm transition-all duration-300 ${
                   selectedTab === "today"
                     ? "bg-white text-gray-900 shadow-lg"
                     : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Today ({todayAppointments.length})
+                Today ({selectedTab === "today" ? pagination.total : statistics.today})
               </button>
               <button
                 onClick={() => setSelectedTab("upcoming")}
-                className={`py-3 px-6 rounded-xl font-medium text-sm transition-all duration-300 ${
+                className={`py-2 px-4 rounded-xl font-medium text-sm transition-all duration-300 ${
                   selectedTab === "upcoming"
                     ? "bg-white text-gray-900 shadow-lg"
                     : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Upcoming ({upcomingAppointments.length})
+                Upcoming (
+                {selectedTab === "upcoming" ? pagination.total : statistics.upcoming})
               </button>
               <button
                 onClick={() => setSelectedTab("missed")}
-                className={`py-3 px-6 rounded-xl font-medium text-sm transition-all duration-300 ${
+                className={`py-2 px-4 rounded-xl font-medium text-sm transition-all duration-300 ${
                   selectedTab === "missed"
                     ? "bg-white text-gray-900 shadow-lg"
                     : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Missed ({missedAppointments.length})
+                Missed ({selectedTab === "missed" ? pagination.total : statistics.missed})
               </button>
               <button
                 onClick={() => setSelectedTab("past")}
-                className={`py-3 px-6 rounded-xl font-medium text-sm transition-all duration-300 ${
+                className={`py-2 px-4 rounded-xl font-medium text-sm transition-all duration-300 ${
                   selectedTab === "past"
                     ? "bg-white text-gray-900 shadow-lg"
                     : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Past ({pastAppointments.length})
+                Past ({selectedTab === "past" ? pagination.total : statistics.completed})
               </button>
             </nav>
           </div>
@@ -758,8 +815,8 @@ const DoctorAppointments = ({ setCurrentView }) => {
                   </h3>
                   <p className="text-white/70">{error}</p>
                 </div>
-              ) : todayAppointments.length > 0 ? (
-                todayAppointments.map((appointment) => (
+              ) : allAppointments.length > 0 ? (
+                allAppointments.map((appointment) => (
                   <AppointmentCard
                     key={appointment._id}
                     appointment={appointment}
@@ -808,8 +865,8 @@ const DoctorAppointments = ({ setCurrentView }) => {
                   </h3>
                   <p className="text-white/70">{error}</p>
                 </div>
-              ) : upcomingAppointments.length > 0 ? (
-                upcomingAppointments.map((appointment) => (
+              ) : allAppointments.length > 0 ? (
+                allAppointments.map((appointment) => (
                   <AppointmentCard
                     key={appointment._id}
                     appointment={appointment}
@@ -846,7 +903,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
                   </h3>
                   <p className="text-white/70">{error}</p>
                 </div>
-              ) : missedAppointments.length > 0 ? (
+              ) : allAppointments.length > 0 ? (
                 <>
                   <div className="bg-orange-500/20 border border-orange-500/40 rounded-xl p-4 mb-6">
                     <div className="flex items-center">
@@ -874,7 +931,7 @@ const DoctorAppointments = ({ setCurrentView }) => {
                       </div>
                     </div>
                   </div>
-                  {missedAppointments.map((appointment) => (
+                  {allAppointments.map((appointment) => (
                     <AppointmentCard
                       key={appointment._id}
                       appointment={appointment}
@@ -912,8 +969,8 @@ const DoctorAppointments = ({ setCurrentView }) => {
                   </h3>
                   <p className="text-white/70">{error}</p>
                 </div>
-              ) : pastAppointments.length > 0 ? (
-                pastAppointments.map((appointment) => (
+              ) : allAppointments.length > 0 ? (
+                allAppointments.map((appointment) => (
                   <AppointmentCard
                     key={appointment._id}
                     appointment={appointment}
@@ -934,6 +991,100 @@ const DoctorAppointments = ({ setCurrentView }) => {
             </>
           )}
         </div>
+
+        {/* Pagination */}
+        {allAppointments.length > 0 && pagination.pages > 1 && (
+          <div className="mt-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-300">
+                Showing page {pagination.current} of {pagination.pages} (
+                {pagination.total} total appointments)
+              </div>
+              <div className="flex items-center space-x-2">
+                {/* Previous Button */}
+                <button
+                  onClick={() => setCurrentPage(pagination.current - 1)}
+                  disabled={pagination.current === 1}
+                  className={`px-3 py-2 rounded-lg transition-all duration-300 ${
+                    pagination.current === 1
+                      ? "bg-gray-600/20 text-gray-500 cursor-not-allowed"
+                      : "bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30"
+                  }`}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Page Numbers */}
+                {Array.from(
+                  { length: Math.min(5, pagination.pages) },
+                  (_, i) => {
+                    let pageNum;
+                    if (pagination.pages <= 5) {
+                      pageNum = i + 1;
+                    } else if (pagination.current <= 3) {
+                      pageNum = i + 1;
+                    } else if (pagination.current >= pagination.pages - 2) {
+                      pageNum = pagination.pages - 4 + i;
+                    } else {
+                      pageNum = pagination.current - 2 + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-2 rounded-lg transition-all duration-300 ${
+                          pageNum === pagination.current
+                            ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                            : "bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  }
+                )}
+
+                {/* Next Button */}
+                <button
+                  onClick={() => setCurrentPage(pagination.current + 1)}
+                  disabled={pagination.current === pagination.pages}
+                  className={`px-3 py-2 rounded-lg transition-all duration-300 ${
+                    pagination.current === pagination.pages
+                      ? "bg-gray-600/20 text-gray-500 cursor-not-allowed"
+                      : "bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30"
+                  }`}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Consultation Modal */}
         <ConsultationModal

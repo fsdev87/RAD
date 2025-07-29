@@ -38,6 +38,16 @@ const WelcomePage = ({
 
       if (result.success) {
         const { user } = result;
+
+        // Check if the user's role matches the selected user role tab
+        if (user.role !== userRole) {
+          setError(
+            `Invalid credentials for ${userRole} login. Please check your credentials or switch to the correct login tab.`
+          );
+          setLoading(false);
+          return;
+        }
+
         setUserType(user.role);
         setCurrentUser(user);
         setIsAuthenticated(true);
@@ -97,6 +107,16 @@ const WelcomePage = ({
 
       if (result.success) {
         const { user } = result;
+
+        // Check if the registered user's role matches the selected user role tab
+        if (user.role !== userRole) {
+          setError(
+            `Registration error: User was registered as ${user.role} but you selected ${userRole}. Please contact support.`
+          );
+          setLoading(false);
+          return;
+        }
+
         setUserType(user.role);
         setCurrentUser(user);
         setIsAuthenticated(true);

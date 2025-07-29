@@ -1,24 +1,52 @@
 import React, { useState, useEffect } from "react";
 import { appointmentsAPI } from "../services/api";
 
-const PatientAppointments = () => {
+const PatientAppointments = ({ setCurrentView }) => {
   const [selectedTab, setSelectedTab] = useState("upcoming");
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pages: 1,
+    total: 0,
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  // Fetch appointments from API
+  // Reset pagination when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setPagination({ current: 1, pages: 1, total: 0 });
+  }, [selectedTab]);
+
+  // Fetch appointments from API based on selected tab
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
         setLoading(true);
-        console.log("Fetching patient appointments...");
-        const result = await appointmentsAPI.getPatientAppointments();
+        console.log(`Fetching ${selectedTab} patient appointments...`);
+
+        let statusFilter;
+        if (selectedTab === "upcoming") {
+          statusFilter = "confirmed,pending,scheduled";
+        } else if (selectedTab === "past") {
+          statusFilter = "completed";
+        }
+
+        const result = await appointmentsAPI.getPatientAppointments({
+          page: currentPage,
+          limit: itemsPerPage,
+          status: statusFilter,
+        });
         console.log("Appointments API result:", result);
 
         if (result.success) {
           console.log("Appointments data:", result.appointments);
           setAppointments(result.appointments || []);
+          setPagination(
+            result.pagination || { current: 1, pages: 1, total: 0 }
+          );
         } else {
           console.error("Appointments API error:", result.message);
           setError(result.message || "Failed to fetch appointments");
@@ -32,18 +60,10 @@ const PatientAppointments = () => {
     };
 
     fetchAppointments();
-  }, []);
+  }, [currentPage, selectedTab]);
 
-  // Separate appointments by status
-  const upcomingAppointments = appointments.filter(
-    (apt) =>
-      apt.status === "confirmed" ||
-      apt.status === "pending" ||
-      apt.status === "scheduled"
-  );
-  const pastAppointments = appointments.filter(
-    (apt) => apt.status === "completed"
-  );
+  // Display appointments based on current tab (already filtered by backend)
+  const displayAppointments = appointments;
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -165,13 +185,13 @@ const PatientAppointments = () => {
 
         {appointment.status === "confirmed" && (
           <div className="mt-4 flex space-x-3">
-            <button className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-2 px-4 rounded-lg transition duration-200 shadow-lg">
+            <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-2 px-4 text-sm rounded-xl transition duration-200 shadow-lg">
               Join Video Call
             </button>
-            <button className="px-4 py-2 border border-white/30 text-gray-300 rounded-lg hover:bg-white/10 transition duration-200">
+            <button className="py-2 px-4 text-sm border border-white/30 text-gray-300 rounded-xl hover:bg-white/10 transition duration-200">
               Reschedule
             </button>
-            <button className="px-4 py-2 border border-red-500/30 text-red-300 rounded-lg hover:bg-red-500/10 transition duration-200">
+            <button className="py-2 px-4 text-sm border border-red-500/30 text-red-300 rounded-xl hover:bg-red-500/10 transition duration-200">
               Cancel
             </button>
           </div>
@@ -238,7 +258,8 @@ const PatientAppointments = () => {
                         : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-400"
                     }`}
                   >
-                    Upcoming ({upcomingAppointments.length})
+                    Upcoming (
+                    {selectedTab === "upcoming" ? pagination.total : "..."})
                   </button>
                   <button
                     onClick={() => setSelectedTab("past")}
@@ -248,7 +269,8 @@ const PatientAppointments = () => {
                         : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-400"
                     }`}
                   >
-                    Past Appointments ({pastAppointments.length})
+                    Past Appointments (
+                    {selectedTab === "past" ? pagination.total : "..."})
                   </button>
                 </nav>
               </div>
@@ -256,86 +278,160 @@ const PatientAppointments = () => {
 
             {/* Appointments List */}
             <div className="space-y-6">
-              {selectedTab === "upcoming" && (
-                <>
-                  {upcomingAppointments.length > 0 ? (
-                    upcomingAppointments.map((appointment) => (
-                      <AppointmentCard
-                        key={appointment.id}
-                        appointment={appointment}
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="text-white/60 text-6xl mb-4">⏳</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
+                    Loading appointments...
+                  </h3>
+                </div>
+              ) : error ? (
+                <div className="text-center py-12">
+                  <div className="text-red-400 text-6xl mb-4">⚠️</div>
+                  <h3 className="text-lg font-medium text-white mb-2">
+                    Error loading appointments
+                  </h3>
+                  <p className="text-white/70">{error}</p>
+                </div>
+              ) : appointments.length > 0 ? (
+                appointments.map((appointment) => (
+                  <AppointmentCard
+                    key={appointment._id}
+                    appointment={appointment}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg
+                      className="w-10 h-10 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
-                    ))
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="w-20 h-20 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg
-                          className="w-10 h-10 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                      <h3 className="text-lg font-medium text-white mb-2">
-                        No upcoming appointments
-                      </h3>
-                      <p className="text-gray-300 mb-6">
-                        Book an appointment with one of our doctors
-                      </p>
-                      <button
-                        onClick={() => setCurrentView("doctors")}
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg shadow-lg transition-all duration-300"
-                      >
-                        Find Doctors
-                      </button>
-                    </div>
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-white mb-2">
+                    {selectedTab === "upcoming"
+                      ? "No upcoming appointments"
+                      : "No past appointments"}
+                  </h3>
+                  <p className="text-gray-300 mb-6">
+                    {selectedTab === "upcoming"
+                      ? "Book an appointment with one of our doctors"
+                      : "Your completed appointments will appear here"}
+                  </p>
+                  {selectedTab === "upcoming" && (
+                    <button
+                      onClick={() => setCurrentView("doctors")}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg shadow-lg transition-all duration-300"
+                    >
+                      Find Doctors
+                    </button>
                   )}
-                </>
-              )}
-
-              {selectedTab === "past" && (
-                <>
-                  {pastAppointments.length > 0 ? (
-                    pastAppointments.map((appointment) => (
-                      <AppointmentCard
-                        key={appointment.id}
-                        appointment={appointment}
-                      />
-                    ))
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="w-20 h-20 bg-gradient-to-r from-gray-400/20 to-gray-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg
-                          className="w-10 h-10 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                      </div>
-                      <h3 className="text-lg font-medium text-white mb-2">
-                        No past appointments
-                      </h3>
-                      <p className="text-gray-300">
-                        Your completed appointments will appear here
-                      </p>
-                    </div>
-                  )}
-                </>
+                </div>
               )}
             </div>
+
+            {/* Pagination */}
+            {appointments.length > 0 && pagination.pages > 1 && (
+              <div className="mt-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-300">
+                    Showing page {pagination.current} of {pagination.pages} (
+                    {pagination.total} total appointments)
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => setCurrentPage(pagination.current - 1)}
+                      disabled={pagination.current === 1}
+                      className={`px-3 py-2 rounded-lg transition-all duration-300 ${
+                        pagination.current === 1
+                          ? "bg-gray-600/20 text-gray-500 cursor-not-allowed"
+                          : "bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30"
+                      }`}
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                    </button>
+
+                    {/* Page Numbers */}
+                    {Array.from(
+                      { length: Math.min(5, pagination.pages) },
+                      (_, i) => {
+                        let pageNum;
+                        if (pagination.pages <= 5) {
+                          pageNum = i + 1;
+                        } else if (pagination.current <= 3) {
+                          pageNum = i + 1;
+                        } else if (pagination.current >= pagination.pages - 2) {
+                          pageNum = pagination.pages - 4 + i;
+                        } else {
+                          pageNum = pagination.current - 2 + i;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`px-3 py-2 rounded-lg transition-all duration-300 ${
+                              pageNum === pagination.current
+                                ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                                : "bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      }
+                    )}
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => setCurrentPage(pagination.current + 1)}
+                      disabled={pagination.current === pagination.pages}
+                      className={`px-3 py-2 rounded-lg transition-all duration-300 ${
+                        pagination.current === pagination.pages
+                          ? "bg-gray-600/20 text-gray-500 cursor-not-allowed"
+                          : "bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30"
+                      }`}
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Quick Actions */}
             <div className="mt-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl">

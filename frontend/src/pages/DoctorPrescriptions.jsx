@@ -411,6 +411,20 @@ const DoctorPrescriptions = () => {
     fetchDoctorAppointments();
   }, []);
 
+  // Debug log for doctorAppointments state changes
+  useEffect(() => {
+    console.log("🔄 DoctorAppointments state updated:", {
+      count: doctorAppointments.length,
+      appointments: doctorAppointments.map(apt => ({
+        id: apt._id,
+        patient: apt.patient?.name || 'No patient name',
+        date: apt.date,
+        time: apt.time,
+        status: apt.status
+      }))
+    });
+  }, [doctorAppointments]);
+
   const showToast = (message, type = "success") => {
     setToast({ message, type, isVisible: true });
   };
@@ -438,26 +452,33 @@ const DoctorPrescriptions = () => {
 
   const fetchDoctorAppointments = async () => {
     try {
-      const result = await appointmentsAPI.getDoctorAppointments();
+      console.log("🔍 Fetching confirmed appointments for prescriptions...");
+      
+      // Fetch confirmed appointments directly from API with higher limit
+      const result = await appointmentsAPI.getDoctorAppointments({
+        status: "confirmed",
+        limit: 100, // Get up to 100 confirmed appointments
+      });
+      
+      console.log("📋 API Response:", result);
+      
       if (result.success) {
-        // Show CONFIRMED appointments that can have prescriptions created
-        // New workflow: confirmed appointment -> create prescription -> auto-complete
-        const confirmedAppointments = result.appointments.filter(
-          (apt) => apt.status === "confirmed"
-        );
+        const confirmedAppointments = result.appointments || [];
 
         console.log(
-          "Available appointments for prescriptions:",
+          `✅ Found ${confirmedAppointments.length} confirmed appointments for prescriptions:`,
           confirmedAppointments
         );
         setDoctorAppointments(confirmedAppointments);
 
         if (confirmedAppointments.length === 0) {
-          console.log("No confirmed appointments available for prescriptions");
+          console.log("⚠️ No confirmed appointments available for prescriptions");
         }
+      } else {
+        console.error("❌ Failed to fetch appointments:", result.message);
       }
     } catch (err) {
-      console.error("Error fetching appointments:", err);
+      console.error("💥 Error fetching appointments:", err);
     }
   };
 

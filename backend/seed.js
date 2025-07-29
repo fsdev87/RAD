@@ -511,119 +511,195 @@ const comprehensiveSeed = async () => {
 
     // ===== CREATE APPOINTMENTS =====
     console.log("\n📋 Creating appointments...");
-    const appointmentsData = [
-      // Past appointments (completed)
-      {
-        patient: createdPatients[2]._id, // Michael Brown
-        doctor: createdDoctors[0]._id, // Dr. Sarah Wilson (Cardiology)
-        date: new Date("2025-07-20"),
-        time: "09:30",
-        reason: "Routine cardiac check-up for hypertension",
-        type: "follow-up",
-        status: "completed",
-        symptoms: ["high blood pressure", "mild chest discomfort"],
-        notes: "Patient reports good medication compliance",
-        consultationFee: 200,
-        paymentStatus: "paid",
-        paymentMethod: "insurance",
-      },
-      {
-        patient: createdPatients[1]._id, // Emily Johnson
-        doctor: createdDoctors[2]._id, // Dr. Lisa Chen (Pediatrics)
-        date: new Date("2025-07-18"),
-        time: "11:00",
-        reason: "Annual physical examination",
-        type: "routine-checkup",
-        status: "completed",
-        notes: "Healthy young adult, all vitals normal",
-        consultationFee: 180,
-        paymentStatus: "paid",
-        paymentMethod: "card",
-      },
-      {
-        patient: createdPatients[0]._id, // John Smith
-        doctor: createdDoctors[1]._id, // Dr. James Rodriguez (Neurology)
-        date: new Date("2025-07-15"),
-        time: "14:30",
-        reason: "Follow-up for recurring headaches",
-        type: "follow-up",
-        status: "completed",
-        symptoms: ["headaches", "mild dizziness"],
-        notes: "Headaches improved with prescribed medication",
-        consultationFee: 250,
-        paymentStatus: "paid",
-        paymentMethod: "insurance",
-      },
 
-      // Current/Upcoming appointments
-      {
-        patient: createdPatients[0]._id, // John Smith
-        doctor: createdDoctors[0]._id, // Dr. Sarah Wilson (Cardiology)
-        date: new Date("2025-07-25"),
-        time: "10:00",
-        reason: "Chest pain evaluation and cardiac assessment",
-        type: "consultation",
-        status: "confirmed",
-        symptoms: ["chest pain", "irregular heartbeat"],
-        notes: "Patient reports occasional chest discomfort over the past week",
-        consultationFee: 200,
-        paymentStatus: "pending",
-        reminderSent: true,
-      },
-      {
-        patient: createdPatients[0]._id, // John Smith
-        doctor: createdDoctors[1]._id, // Dr. James Rodriguez (Neurology)
-        date: new Date("2025-07-30"),
-        time: "14:30",
-        reason: "Neurological consultation for persistent headaches",
-        type: "follow-up",
-        status: "scheduled",
-        symptoms: ["headaches", "light sensitivity"],
-        notes: "Follow-up appointment for recurring headaches",
-        consultationFee: 250,
-        paymentStatus: "pending",
-      },
-      {
-        patient: createdPatients[1]._id, // Emily Johnson
-        doctor: createdDoctors[4]._id, // Dr. Maria Garcia (Dermatology)
-        date: new Date("2025-08-02"),
-        time: "15:00",
-        reason: "Skin rash examination and treatment",
-        type: "consultation",
-        status: "scheduled",
-        symptoms: ["skin rash", "itching"],
-        notes:
-          "Patient developed unusual rash on arms, needs dermatological evaluation",
-        consultationFee: 220,
-        paymentStatus: "pending",
-      },
-      {
-        patient: createdPatients[2]._id, // Michael Brown
-        doctor: createdDoctors[0]._id, // Dr. Sarah Wilson (Cardiology)
-        date: new Date("2025-08-05"),
-        time: "11:00",
-        reason: "Diabetes and hypertension management",
-        type: "follow-up",
-        status: "scheduled",
-        symptoms: ["elevated blood sugar", "high blood pressure"],
-        notes: "Regular follow-up for chronic conditions management",
-        consultationFee: 200,
-        paymentStatus: "pending",
-      },
-      {
-        patient: createdPatients[1]._id, // Emily Johnson
-        doctor: createdDoctors[3]._id, // Dr. Robert Taylor (Orthopedics)
-        date: new Date("2025-08-08"),
-        time: "10:30",
-        reason: "Knee pain evaluation",
-        type: "consultation",
-        status: "scheduled",
-        symptoms: ["knee pain", "stiffness"],
-        notes: "Patient reports knee pain after jogging",
-        consultationFee: 300,
-        paymentStatus: "pending",
-      },
-    ];
+    // Helper function to generate realistic appointment times
+    const generateAppointmentTime = (
+      startTime,
+      endTime,
+      duration = 30,
+      excludeTimes = []
+    ) => {
+      const start = timeToMinutes(startTime);
+      const end = timeToMinutes(endTime);
+      const lunchStart = timeToMinutes("12:00");
+      const lunchEnd = timeToMinutes("13:00");
+
+      const availableTimes = [];
+      for (let minutes = start; minutes < end; minutes += duration) {
+        // Skip lunch hour
+        if (minutes >= lunchStart && minutes < lunchEnd) continue;
+
+        const timeStr = minutesToTime(minutes);
+        if (!excludeTimes.includes(timeStr)) {
+          availableTimes.push(timeStr);
+        }
+      }
+
+      return availableTimes[Math.floor(Math.random() * availableTimes.length)];
+    };
+
+    const timeToMinutes = (timeStr) => {
+      const [hours, minutes] = timeStr.split(":").map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const minutesToTime = (minutes) => {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours.toString().padStart(2, "0")}:${mins
+        .toString()
+        .padStart(2, "0")}`;
+    };
+
+    const appointmentsData = [];
+
+    // Generate realistic appointment distribution
+    const today = new Date("2025-07-30");
+
+    // Past appointments (last 2 weeks)
+    for (let i = 14; i >= 1; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+
+      // Skip weekends for most doctors
+      if (date.getDay() === 0 || date.getDay() === 6) continue;
+
+      // Random number of appointments per day (2-6)
+      const appointmentsPerDay = Math.floor(Math.random() * 5) + 2;
+      const usedTimes = [];
+
+      for (let j = 0; j < appointmentsPerDay; j++) {
+        const doctorIndex = Math.floor(Math.random() * createdDoctors.length);
+        const patientIndex = Math.floor(Math.random() * createdPatients.length);
+        const time = generateAppointmentTime("09:00", "17:00", 30, usedTimes);
+
+        if (time) {
+          usedTimes.push(time);
+          appointmentsData.push({
+            patient: createdPatients[patientIndex]._id,
+            doctor: createdDoctors[doctorIndex]._id,
+            date: new Date(date),
+            time: time,
+            reason: [
+              "Follow-up consultation",
+              "Routine check-up",
+              "Health screening",
+              "Symptom evaluation",
+            ][Math.floor(Math.random() * 4)],
+            type: ["consultation", "follow-up", "routine-checkup"][
+              Math.floor(Math.random() * 3)
+            ],
+            status: "completed",
+            consultationFee: [180, 200, 220, 250, 300][
+              Math.floor(Math.random() * 5)
+            ],
+            paymentStatus: "paid",
+          });
+        }
+      }
+    }
+
+    // Tomorrow's appointments (July 31, 2025)
+    const tomorrow = new Date("2025-07-31");
+    const tomorrowUsedTimes = {};
+
+    // Create appointments for each doctor tomorrow with some gaps
+    createdDoctors.forEach((doctor, doctorIndex) => {
+      tomorrowUsedTimes[doctorIndex] = [];
+
+      // 3-5 appointments per doctor tomorrow (leaving some slots free)
+      const appointmentCount = Math.floor(Math.random() * 3) + 3;
+
+      for (let i = 0; i < appointmentCount; i++) {
+        const time = generateAppointmentTime(
+          "09:00",
+          "17:00",
+          30,
+          tomorrowUsedTimes[doctorIndex]
+        );
+        if (time) {
+          tomorrowUsedTimes[doctorIndex].push(time);
+
+          appointmentsData.push({
+            patient:
+              createdPatients[
+                Math.floor(Math.random() * createdPatients.length)
+              ]._id,
+            doctor: doctor._id,
+            date: tomorrow,
+            time: time,
+            reason: ["Consultation", "Follow-up", "Check-up", "Treatment"][
+              Math.floor(Math.random() * 4)
+            ],
+            type: ["consultation", "follow-up", "routine-checkup"][
+              Math.floor(Math.random() * 3)
+            ],
+            status: "confirmed",
+            consultationFee: [180, 200, 220, 250, 300][doctorIndex],
+            paymentStatus: "pending",
+          });
+        }
+      }
+    });
+
+    // Future appointments (next 2 weeks) with varying density
+    for (let i = 2; i <= 14; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+
+      // Skip weekends
+      if (date.getDay() === 0 || date.getDay() === 6) continue;
+
+      // Vary appointment density by day
+      const dayDensity = Math.random(); // 0-1
+
+      createdDoctors.forEach((doctor, doctorIndex) => {
+        const maxAppointments =
+          dayDensity > 0.7
+            ? 8 // High density day
+            : dayDensity > 0.4
+            ? 4 // Medium density day
+            : 2; // Low density day
+
+        const appointmentCount =
+          Math.floor(Math.random() * maxAppointments) + 1;
+        const dayUsedTimes = [];
+
+        for (let j = 0; j < appointmentCount; j++) {
+          const time = generateAppointmentTime(
+            "09:00",
+            "17:00",
+            30,
+            dayUsedTimes
+          );
+          if (time) {
+            dayUsedTimes.push(time);
+
+            appointmentsData.push({
+              patient:
+                createdPatients[
+                  Math.floor(Math.random() * createdPatients.length)
+                ]._id,
+              doctor: doctor._id,
+              date: new Date(date),
+              time: time,
+              reason: [
+                "Consultation",
+                "Follow-up",
+                "Routine check-up",
+                "Health assessment",
+              ][Math.floor(Math.random() * 4)],
+              type: ["consultation", "follow-up", "routine-checkup"][
+                Math.floor(Math.random() * 3)
+              ],
+              status: "scheduled",
+              consultationFee: [180, 200, 220, 250, 300][doctorIndex],
+              paymentStatus: "pending",
+            });
+          }
+        }
+      });
+    }
 
     const createdAppointments = [];
     for (const appointmentData of appointmentsData) {
